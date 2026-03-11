@@ -1,0 +1,30 @@
+spring:
+  # 1. H2 인메모리 DB 설정 (로그인 과정이 필요 없어 에러가 안 납니다!)
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # 2. JPA/Hibernate 설정 (H2 전용 방언 사용)
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # 3. H2를 웹에서 볼 수 있게 해주는 콘솔
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# 4. Swagger UI 설정 (민주님이 확인하고 싶은 것!)
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
