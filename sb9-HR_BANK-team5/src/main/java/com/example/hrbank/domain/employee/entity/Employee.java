@@ -1,6 +1,6 @@
 package com.example.hrbank.domain.employee.entity;
 
-import com.example.hrbank.domain.binarycontent.BinaryContent;
+import com.example.hrbank.domain.binarycontent.entity.BinaryContent;
 import com.example.hrbank.domain.department.entity.Department;
 import com.example.hrbank.domain.employee.entity.enums.EmployeeStatus;
 import com.example.hrbank.global.entity.BaseTimeEntity;
