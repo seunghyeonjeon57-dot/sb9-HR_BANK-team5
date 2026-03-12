@@ -3,10 +3,10 @@ package com.example.hrbank.domain.backup.entity;
 import com.example.hrbank.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "backup_history")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -17,18 +17,20 @@ public class BackupHistory extends BaseTimeEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false)
+  @Column(name = "worker", nullable = false)
   private String worker;
 
-  @Column(nullable = false)
-  private LocalDateTime startedAt; // 시작 시간
+  @Column(name = "started_at", nullable = false)
+  private LocalDateTime startedAt;
 
-  private LocalDateTime endedAt; // 종료 시간
+  @Column(name = "ended_at")
+  private LocalDateTime endedAt;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
+  @Column(name = "status", nullable = false)
   private BackupStatus status;
 
+  @Column(name = "file_id")
   private Long fileId;
 
   public void complete(Long fileId) {
