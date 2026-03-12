@@ -1,4 +1,4 @@
-package com.example.hrbank.domain.binarycontent;
+package com.example.hrbank.domain.binarycontent.entity;
 
 import com.example.hrbank.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
@@ -7,11 +7,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "binary_contents")
 public class BinaryContent extends BaseTimeEntity {
