@@ -1,7 +1,5 @@
 package com.example.hrbank.domain.binarycontent;
 
-public interface BinaryContentRepository {
-
-
+public class BinaryContentDto {
 
 }

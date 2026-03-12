@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name = "files")
+@Table(name = "binary_contents")
 public class BinaryContent extends BaseTimeEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @Column(name = "file_name", nullable = false, length = 200)
