@@ -32,9 +32,9 @@ public class Department extends BaseTimeEntity {
   private LocalDate establishedDate;
 
   @Column(name = "employee_count", nullable = false)
-  private int employeeCount;
+  private Integer employeeCount;
 
-  public Department(String name, String description, LocalDate establishedDate , int employeeCount ){
+  public Department(String name, String description, LocalDate establishedDate , Integer employeeCount ){
     this.name = name;
     this.description = description;
     this.establishedDate = establishedDate;
