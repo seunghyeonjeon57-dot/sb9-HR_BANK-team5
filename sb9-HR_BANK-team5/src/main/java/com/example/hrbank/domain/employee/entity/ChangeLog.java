@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -34,10 +35,10 @@ public class ChangeLog {
   @Column(name="ip_address",length = 255)
   private String ipAddress;
   @Column(name="at",nullable = false)
-  private LocalDate at;
+  private Instant at;
 
   public ChangeLog(Long id, String type, String employeeNumber, String memo, String ipAddress,
-      LocalDate at) {
+      Instant at) {
     this.id = id;
     this.type = type;
     this.employeeNumber = employeeNumber;
