@@ -8,7 +8,7 @@ import lombok.Builder;
 
 
 @Builder
-@Schema(description = "file DTO")
+@Schema(description = "BinaryContent DTO")
 public record BinaryContentDto(
     Long id,
     String fileName,

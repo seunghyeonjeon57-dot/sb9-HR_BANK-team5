@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriUtils;
 
 @Component
-public class LocalStorage implements storage {
+public class LocalStorage implements Storage {
 
   private final Path root;
 
