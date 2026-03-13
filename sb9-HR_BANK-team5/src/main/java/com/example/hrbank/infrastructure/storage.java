@@ -11,6 +11,6 @@ public interface storage {
 
   ResponseEntity<?> download(BinaryContentDto metaData);
 
-  void delete(long id);
+  void delete(Long id);
 
 }
