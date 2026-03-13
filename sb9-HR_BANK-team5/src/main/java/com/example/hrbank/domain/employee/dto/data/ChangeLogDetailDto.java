@@ -3,6 +3,7 @@ package com.example.hrbank.domain.employee.dto.data;
 import com.example.hrbank.domain.employee.entity.enums.ChannelType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,7 @@ public record ChangeLogDetailDto(
     String employeeNumber,
     String memo,
     String ipAddress,
-    Instant at,
+    LocalDateTime at,
     String employeeName,
     Long profileImageId,
     List<DiffDto> diffs

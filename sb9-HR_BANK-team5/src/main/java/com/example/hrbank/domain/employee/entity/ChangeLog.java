@@ -15,12 +15,15 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.engine.internal.Cascade;
+import org.springframework.cglib.core.Local;
 
 @Entity
 @Table(name="change_logs")
@@ -41,7 +44,7 @@ public class ChangeLog {
   @Column(name="ip_address",length = 255)
   private String ipAddress;
   @Column(name="at",nullable = false)
-  private Instant at;
+  private LocalDateTime at;
   @OneToMany(mappedBy = "changeLog", cascade = CascadeType.ALL,orphanRemoval = true)
   private List<ChannelDiff> diffs=new ArrayList<>();
 
@@ -49,14 +52,14 @@ public class ChangeLog {
 
 
 
-
+  @Builder
   public ChangeLog(ChannelType type, String employeeNumber, String memo, String ipAddress,
-      Instant at) {
+      LocalDateTime at) {
     this.type = type;
     this.employeeNumber = employeeNumber;
     this.memo = memo;
     this.ipAddress = ipAddress;
-    this.at = at;
+    this.at = (at!=null)? at:LocalDateTime.now();
   }
   public void addDiff(String propertyName, String before, String after) {
     ChannelDiff diff = new ChannelDiff(propertyName, before, after, this);

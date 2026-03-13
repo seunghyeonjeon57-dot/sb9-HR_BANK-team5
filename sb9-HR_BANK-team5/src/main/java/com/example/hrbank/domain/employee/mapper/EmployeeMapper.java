@@ -8,6 +8,7 @@ import com.example.hrbank.domain.department.mapper.DepartmentMapper;
 import com.example.hrbank.domain.employee.dto.data.CursorPageResponseEmployeeDto;
 import com.example.hrbank.domain.employee.dto.data.EmployeeDto;
 import com.example.hrbank.domain.employee.entity.Employee;
+import java.util.Base64;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -25,14 +26,18 @@ public interface EmployeeMapper {
   default CursorPageResponseEmployeeDto toCursorPageResponse(
       List<Employee> entities,
       long totalElements,
-      boolean hasNext,
-      int size
+      int size,
+      boolean hasNext
   ){
     List<EmployeeDto> content = toDtoList(entities);
     Long lastId = entities.isEmpty() ? null : entities.get(entities.size()-1).getId();
+    String encodedCursor = null;
+    if(lastId != null){
+      encodedCursor = Base64.getEncoder().encodeToString(String.valueOf(lastId).getBytes());
+    }
     return new CursorPageResponseEmployeeDto(
         content,
-        lastId != null ? lastId.toString():null,
+        encodedCursor,
         lastId,
         size,
         totalElements,
