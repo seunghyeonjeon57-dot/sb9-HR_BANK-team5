@@ -1,8 +1,8 @@
 package com.example.hrbank.domain.employee.mapper;
 
 
-import com.example.hrbank.domain.binarycontent.BinaryContent;
-import com.example.hrbank.domain.department.entity.Department;
+import com.example.hrbank.domain.binarycontent.mapper.BinaryContentMapper;
+import com.example.hrbank.domain.department.mapper.DepartmentMapper;
 import com.example.hrbank.domain.employee.dto.data.EmployeeDto;
 import com.example.hrbank.domain.employee.entity.Employee;
 import org.mapstruct.Mapper;
