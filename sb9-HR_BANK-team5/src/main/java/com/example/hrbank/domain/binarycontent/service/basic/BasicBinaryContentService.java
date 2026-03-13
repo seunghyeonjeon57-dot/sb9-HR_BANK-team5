@@ -7,9 +7,8 @@ import com.example.hrbank.domain.binarycontent.repository.BinaryContentRepositor
 import com.example.hrbank.domain.binarycontent.service.BinaryContentService;
 import com.example.hrbank.infrastructure.Storage;
 import jakarta.transaction.Transactional;
-import java.util.List;
+import java.nio.file.Path;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +38,7 @@ public class BasicBinaryContentService implements BinaryContentService {
 
   @Override
   @Transactional
-  public BinaryContentDto save(BinaryContentRequest request, byte[] bytes) {
+  public BinaryContentDto save(BinaryContentRequest request, Path filePath) {
 
     BinaryContent binaryContent = new BinaryContent(
         request.fileName(),
@@ -47,7 +46,7 @@ public class BasicBinaryContentService implements BinaryContentService {
         request.fileSize()
     );
     BinaryContent savedEntity = repository.save(binaryContent);
-    storage.put(savedEntity.getId(), bytes);
+    storage.put(savedEntity.getId(),filePath);
 
     return new BinaryContentDto(
         savedEntity.getId(),
@@ -57,21 +56,22 @@ public class BasicBinaryContentService implements BinaryContentService {
         savedEntity.getCreatedAt()
     );
   }
+  //path 추가
+  //BinaryContentDto save(BinaryContentRequest request, java.nio.file.Path filePath);
 
   @Override
   @Transactional
-  public List<BinaryContentDto> findById(Long id) {
+  public BinaryContentDto findById(Long id) {
+    BinaryContent entity = repository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("없는 파일입니다"));
+    return new BinaryContentDto(
+        entity.getId(),
+        entity.getFileName(),
+        entity.getContentType(),
+        entity.getFileSize(),
+        entity.getCreatedAt()
+    );
 
-    return repository.findById(id)
-        .stream()
-        .map(entity -> new BinaryContentDto(
-            entity.getId(),
-            entity.getFileName(),
-            entity.getContentType(),
-            entity.getFileSize(),
-            entity.getCreatedAt()
-        ))
-        .collect(Collectors.toList());
   }
 
   @Override

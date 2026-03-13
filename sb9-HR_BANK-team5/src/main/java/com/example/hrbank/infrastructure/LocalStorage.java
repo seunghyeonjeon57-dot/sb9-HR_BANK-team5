@@ -39,15 +39,13 @@ public class LocalStorage implements Storage {
   }
 
   @Override
-  public Long put(Long id, byte[] bytes) {
-    Path filePath = resolvePath(id);
+  public Long put(Long id, Path filePath) {
+    Path targetPath = resolvePath(id);
     try {
-      Files.write(filePath, bytes, StandardOpenOption.CREATE_NEW);
+      Files.copy(filePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
       return id;
-    } catch (FileAlreadyExistsException e) {
-      throw new RuntimeException("이미 존재하는 파일 ID: " + id, e);
     } catch (IOException e) {
-      throw new RuntimeException("저장 실패", e);
+      throw new RuntimeException("파일 저장 실패");
     }
   }
 
