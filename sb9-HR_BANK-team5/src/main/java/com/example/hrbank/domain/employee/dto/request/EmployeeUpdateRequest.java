@@ -1,5 +1,6 @@
 package com.example.hrbank.domain.employee.dto.request;
 
+import com.example.hrbank.domain.employee.entity.enums.EmployeeStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
@@ -13,7 +14,7 @@ public record EmployeeUpdateRequest(
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     LocalDate hireDate,
-    String status,
+    EmployeeStatus status,
     String memo
 ) {
 

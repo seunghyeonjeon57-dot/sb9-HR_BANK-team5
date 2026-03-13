@@ -2,22 +2,28 @@ package com.example.hrbank.domain.employee.entity;
 
 
 import com.example.hrbank.domain.employee.entity.enums.ChannelType;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.engine.internal.Cascade;
 
 @Entity
-@Table(name="change_log")
+@Table(name="change_logs")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ChangeLog {
@@ -27,7 +33,7 @@ public class ChangeLog {
 
   @Enumerated(EnumType.STRING)
   @Column(name ="type",nullable = false)
-  private String type;
+  private ChannelType type;
   @Column(name= "employee_number",nullable = false,length = 100)
   private String employeeNumber;
   @Column(name="memo",nullable = false,length = 255)
@@ -36,14 +42,24 @@ public class ChangeLog {
   private String ipAddress;
   @Column(name="at",nullable = false)
   private Instant at;
+  @OneToMany(mappedBy = "changeLog", cascade = CascadeType.ALL,orphanRemoval = true)
+  private List<ChannelDiff> diffs=new ArrayList<>();
 
-  public ChangeLog(Long id, String type, String employeeNumber, String memo, String ipAddress,
+
+
+
+
+
+  public ChangeLog(ChannelType type, String employeeNumber, String memo, String ipAddress,
       Instant at) {
-    this.id = id;
     this.type = type;
     this.employeeNumber = employeeNumber;
     this.memo = memo;
     this.ipAddress = ipAddress;
     this.at = at;
+  }
+  public void addDiff(String propertyName, String before, String after) {
+    ChannelDiff diff = new ChannelDiff(propertyName, before, after, this);
+    this.diffs.add(diff);
   }
 }

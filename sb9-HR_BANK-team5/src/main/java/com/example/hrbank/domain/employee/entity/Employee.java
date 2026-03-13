@@ -50,7 +50,7 @@ public class Employee extends BaseTimeEntity {
   private Department department;
 
   @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name="profile_Image_id")
+  @JoinColumn(name="profile_image_id")
   private BinaryContent profileImage;
 
 
@@ -66,5 +66,13 @@ public class Employee extends BaseTimeEntity {
     this.status = status;
     this.department = department;
     this.profileImage = profileImage;
+  }
+
+  public void changeDepartment(Department newdepartment){
+    this.department=newdepartment;
+  }
+  public void updateProfile(String name,String position){
+    this.name = name;
+    this.position=position;
   }
 }
