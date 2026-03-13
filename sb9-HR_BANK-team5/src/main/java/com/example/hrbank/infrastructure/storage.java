@@ -1,5 +1,16 @@
 package com.example.hrbank.infrastructure;
 
-public class storage {
+import com.example.hrbank.domain.binarycontent.dto.data.BinaryContentDto;
+import java.io.InputStream;
+import org.springframework.http.ResponseEntity;
+
+public interface storage {
+  Long put(Long Id, byte[] bytes);
+
+  InputStream get(Long Id);
+
+  ResponseEntity<?> download(BinaryContentDto metaData);
+
+  void delete(long id);
 
 }
