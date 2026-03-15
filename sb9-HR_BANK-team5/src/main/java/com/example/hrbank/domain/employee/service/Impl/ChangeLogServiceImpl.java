@@ -8,7 +8,7 @@ import com.example.hrbank.domain.employee.dto.request.ChangeLogSearchRequest;
 import com.example.hrbank.domain.employee.entity.ChangeLog;
 import com.example.hrbank.domain.employee.entity.Employee;
 import com.example.hrbank.domain.employee.entity.enums.ChannelType;
-import com.example.hrbank.domain.employee.mapper.ChannelLogMapper;
+import com.example.hrbank.domain.employee.mapper.ChangeLogMapper;
 import com.example.hrbank.domain.employee.repository.ChangeLogRepository;
 import com.example.hrbank.domain.employee.repository.EmployeeRepository;
 import com.example.hrbank.domain.employee.service.ChangeLogService;
@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChangeLogServiceImpl implements ChangeLogService {
   private final ChangeLogRepository repository;
-  private final ChannelLogMapper mapper;
+  private final ChangeLogMapper mapper;
   private final EmployeeRepository employeeRepository;
   @Override
   @Transactional
@@ -56,7 +56,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
     boolean hasNext = entities.size()>request.size();
     List<ChangeLog> subEntities = hasNext ? entities.subList(0,request.size()) : entities;
 
-    return mapper.CursorPageResponse(
+    return mapper.toCursorPageResponse(
         subEntities,
         request.type(),
         request.size(),

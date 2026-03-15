@@ -12,13 +12,13 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface ChannelLogMapper {
+public interface ChangeLogMapper {
 
   ChangeLogDto toDto(ChangeLog changeLog);
 
   List<ChangeLogDto> toDtoList(List<ChangeLog> entities);
 
-  default CursorPageResponseChangeLogDto CursorPageResponse(
+  default CursorPageResponseChangeLogDto toCursorPageResponse(
       List<ChangeLog> entities,
       ChannelType type,
       Integer size,
