@@ -33,6 +33,7 @@ public class BasicBinaryContentService implements BinaryContentService {
         file.getFileSize(),
         file.getCreatedAt()
     );
+
     return storage.download(dto);
   }
 
@@ -56,8 +57,6 @@ public class BasicBinaryContentService implements BinaryContentService {
         savedEntity.getCreatedAt()
     );
   }
-  //path 추가
-  //BinaryContentDto save(BinaryContentRequest request, java.nio.file.Path filePath);
 
   @Override
   @Transactional
