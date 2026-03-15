@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
+
   private final JPAQueryFactory queryFactory;
   private final QChangeLog changeLog = QChangeLog.changeLog;
 
@@ -27,14 +28,28 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
             containsEmpNo(request.employeeNumber()),
             containsMemo(request.memo()),
             containsIp(request.ipAddress()),
-            betweenAt(request.atFrom(),request.atTo()),
+            betweenAt(request.atFrom(), request.atTo()),
             eqType(request.type()),
             ltLastId(request.lastId())
 
         )
         .orderBy(createOrderSpecifier(request.sortField()))
-        .limit(request.size()+1)
+        .limit(request.size() + 1)
         .fetch();
+  }
+
+  @Override
+  public Long countSearchLogs(ChangeLogSearchRequest request) {
+    return queryFactory.select(changeLog.count())
+        .from(changeLog)
+        .where(
+            containsEmpNo(request.employeeNumber()),
+            containsMemo(request.memo()),
+            containsIp(request.ipAddress()),
+            betweenAt(request.atFrom(), request.atTo()),
+            eqType(request.type())
+        )
+        .fetchOne();
   }
 
   private BooleanExpression containsEmpNo(String empNo) {
@@ -56,7 +71,7 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
 
   private BooleanExpression betweenAt(LocalDateTime from, LocalDateTime to) {
 
-    return (from != null && to != null) ? changeLog.at.between(from, to) : null;
+    return (from != null && to != null) ? changeLog.createdAt.between(from, to) : null;
   }
 
   private BooleanExpression ltLastId(Long lastId) {
@@ -68,6 +83,23 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
     if ("ipAddress".equals(sortField)) {
       return changeLog.ipAddress.asc();
     }
-    return changeLog.at.desc();
+    return changeLog.createdAt.desc();
   }
+
+
+  @Override
+  public Long countChangeLogs(LocalDateTime fromDate, LocalDateTime toDate) {
+    LocalDateTime start = (fromDate != null) ? fromDate : LocalDateTime.now().minusDays(7);
+    LocalDateTime end = (toDate != null) ? toDate : LocalDateTime.now();
+
+    Long count = queryFactory.select(changeLog.count())
+        .from(changeLog)
+        .where(
+            changeLog.createdAt.between(start, end)
+        )
+        .fetchOne();
+
+    return count !=null ?count : 0L;
+  }
+
 }

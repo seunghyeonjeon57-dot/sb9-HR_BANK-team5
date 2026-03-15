@@ -20,7 +20,10 @@ public class QChangeLog extends EntityPathBase<ChangeLog> {
 
     public static final QChangeLog changeLog = new QChangeLog("changeLog");
 
-    public final DateTimePath<java.time.LocalDateTime> at = createDateTime("at", java.time.LocalDateTime.class);
+    public final com.example.hrbank.global.entity.QBaseTimeEntity _super = new com.example.hrbank.global.entity.QBaseTimeEntity(this);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     public final ListPath<ChannelDiff, QChannelDiff> diffs = this.<ChannelDiff, QChannelDiff>createList("diffs", ChannelDiff.class, QChannelDiff.class, PathInits.DIRECT2);
 
@@ -33,6 +36,9 @@ public class QChangeLog extends EntityPathBase<ChangeLog> {
     public final StringPath memo = createString("memo");
 
     public final EnumPath<com.example.hrbank.domain.employee.entity.enums.ChannelType> type = createEnum("type", com.example.hrbank.domain.employee.entity.enums.ChannelType.class);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
     public QChangeLog(String variable) {
         super(ChangeLog.class, forVariable(variable));

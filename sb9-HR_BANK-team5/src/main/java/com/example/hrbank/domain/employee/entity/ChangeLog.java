@@ -2,6 +2,7 @@ package com.example.hrbank.domain.employee.entity;
 
 
 import com.example.hrbank.domain.employee.entity.enums.ChannelType;
+import com.example.hrbank.global.entity.BaseTimeEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,7 +30,7 @@ import org.springframework.cglib.core.Local;
 @Table(name="change_logs")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class ChangeLog {
+public class ChangeLog extends BaseTimeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -43,8 +44,6 @@ public class ChangeLog {
   private String memo;
   @Column(name="ip_address",length = 255)
   private String ipAddress;
-  @Column(name="at",nullable = false)
-  private LocalDateTime at;
   @OneToMany(mappedBy = "changeLog", cascade = CascadeType.ALL,orphanRemoval = true)
   private List<ChannelDiff> diffs=new ArrayList<>();
 
@@ -53,13 +52,13 @@ public class ChangeLog {
 
 
   @Builder
-  public ChangeLog(ChannelType type, String employeeNumber, String memo, String ipAddress,
-      LocalDateTime at) {
+  public ChangeLog(ChannelType type, String employeeNumber, String memo, String ipAddress
+      ) {
     this.type = type;
     this.employeeNumber = employeeNumber;
     this.memo = memo;
     this.ipAddress = ipAddress;
-    this.at = (at!=null)? at:LocalDateTime.now();
+
   }
   public void addDiff(String propertyName, String before, String after) {
     ChannelDiff diff = new ChannelDiff(propertyName, before, after, this);

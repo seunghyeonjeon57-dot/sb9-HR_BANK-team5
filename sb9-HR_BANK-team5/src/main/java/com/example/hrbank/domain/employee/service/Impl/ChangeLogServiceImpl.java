@@ -2,7 +2,6 @@ package com.example.hrbank.domain.employee.service.Impl;
 
 
 import com.example.hrbank.domain.employee.dto.data.ChangeLogDetailDto;
-import com.example.hrbank.domain.employee.dto.data.ChangeLogDto;
 import com.example.hrbank.domain.employee.dto.data.CursorPageResponseChangeLogDto;
 import com.example.hrbank.domain.employee.dto.data.DiffDto;
 import com.example.hrbank.domain.employee.dto.request.ChangeLogSearchRequest;
@@ -11,7 +10,10 @@ import com.example.hrbank.domain.employee.entity.Employee;
 import com.example.hrbank.domain.employee.entity.enums.ChannelType;
 import com.example.hrbank.domain.employee.mapper.ChannelLogMapper;
 import com.example.hrbank.domain.employee.repository.ChangeLogRepository;
+import com.example.hrbank.domain.employee.repository.EmployeeRepository;
 import com.example.hrbank.domain.employee.service.ChangeLogService;
+import jakarta.persistence.EntityNotFoundException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class ChannelLogServiceImpl implements ChangeLogService {
+public class ChangeLogServiceImpl implements ChangeLogService {
   private final ChangeLogRepository repository;
   private final ChannelLogMapper mapper;
+  private final EmployeeRepository employeeRepository;
   @Override
   @Transactional
   public void createChannelLog(Employee employee, ChannelType type, String employeeNumber,
@@ -33,7 +36,6 @@ public class ChannelLogServiceImpl implements ChangeLogService {
         .employeeNumber(employeeNumber)
         .memo(memo)
         .ipAddress(ipAddress)
-        .at(LocalDateTime.now())
         .build();
 
     if(diffs!=null){
@@ -48,16 +50,36 @@ public class ChannelLogServiceImpl implements ChangeLogService {
   @Override
   @Transactional(readOnly = true)
   public CursorPageResponseChangeLogDto getChangeLog(ChangeLogSearchRequest request) {
-    return repository.searchLogs()
+    List<ChangeLog> entities = repository.searchLogs(request);
+    Long totalElements = repository.countSearchLogs(request);
+
+    boolean hasNext = entities.size()>request.size();
+    List<ChangeLog> subEntities = hasNext ? entities.subList(0,request.size()) : entities;
+
+    return mapper.CursorPageResponse(
+        subEntities,
+        request.type(),
+        request.size(),
+        totalElements,
+        hasNext
+    );
+
   }
 
   @Override
   public ChangeLogDetailDto getChangeLogDetail(Long id) {
-    return null;
+    ChangeLog log = repository.findById(id).orElseThrow(()-> new EntityNotFoundException("존재하지 않는 id"));
+
+    Employee employee= employeeRepository.findByEmployeeNumber(log.getEmployeeNumber())
+        .orElseThrow(()->new EntityNotFoundException("직원 정보를 찾을 없습니다."));
+
+    return mapper.toDetailDto(log,employee);
   }
 
   @Override
   public long countChangelogs(LocalDateTime fromDate, LocalDateTime toDate) {
-    return 0;
+    LocalDateTime start = (fromDate != null) ? fromDate : LocalDateTime.now().minusDays(7);
+    LocalDateTime end = (toDate != null) ?  toDate : LocalDateTime.now();
+    return repository.countChangeLogs(start,end);
   }
 }

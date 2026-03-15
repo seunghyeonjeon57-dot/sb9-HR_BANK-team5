@@ -1,5 +1,6 @@
 package com.example.hrbank.domain.employee.dto.data;
 
+import com.example.hrbank.domain.binarycontent.entity.BinaryContent;
 import com.example.hrbank.domain.employee.entity.enums.ChannelType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
