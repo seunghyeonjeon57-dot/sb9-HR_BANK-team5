@@ -2,6 +2,7 @@ package com.example.hrbank.domain.employee.entity;
 
 
 import com.example.hrbank.domain.employee.entity.enums.ChannelType;
+import com.example.hrbank.global.entity.BaseTimeEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,18 +16,21 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.engine.internal.Cascade;
+import org.springframework.cglib.core.Local;
 
 @Entity
 @Table(name="change_logs")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class ChangeLog {
+public class ChangeLog extends BaseTimeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -40,8 +44,6 @@ public class ChangeLog {
   private String memo;
   @Column(name="ip_address",length = 255)
   private String ipAddress;
-  @Column(name="at",nullable = false)
-  private Instant at;
   @OneToMany(mappedBy = "changeLog", cascade = CascadeType.ALL,orphanRemoval = true)
   private List<ChannelDiff> diffs=new ArrayList<>();
 
@@ -49,14 +51,14 @@ public class ChangeLog {
 
 
 
-
-  public ChangeLog(ChannelType type, String employeeNumber, String memo, String ipAddress,
-      Instant at) {
+  @Builder
+  public ChangeLog(ChannelType type, String employeeNumber, String memo, String ipAddress
+      ) {
     this.type = type;
     this.employeeNumber = employeeNumber;
     this.memo = memo;
     this.ipAddress = ipAddress;
-    this.at = at;
+
   }
   public void addDiff(String propertyName, String before, String after) {
     ChannelDiff diff = new ChannelDiff(propertyName, before, after, this);
