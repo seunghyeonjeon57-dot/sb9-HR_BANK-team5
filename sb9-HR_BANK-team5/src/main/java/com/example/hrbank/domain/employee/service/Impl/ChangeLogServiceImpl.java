@@ -13,7 +13,6 @@ import com.example.hrbank.domain.employee.repository.ChangeLogRepository;
 import com.example.hrbank.domain.employee.repository.EmployeeRepository;
 import com.example.hrbank.domain.employee.service.ChangeLogService;
 import jakarta.persistence.EntityNotFoundException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -67,6 +66,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public ChangeLogDetailDto getChangeLogDetail(Long id) {
     ChangeLog log = repository.findById(id).orElseThrow(()-> new EntityNotFoundException("존재하지 않는 id"));
 

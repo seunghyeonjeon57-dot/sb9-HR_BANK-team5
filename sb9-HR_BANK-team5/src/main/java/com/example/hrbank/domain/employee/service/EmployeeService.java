@@ -11,7 +11,7 @@ import java.util.List;
 public interface EmployeeService {
   EmployeeDto create(EmployeeCreateRequest request, BinaryContent profile);
   CursorPageResponseEmployeeDto getEmployeePage(EmployeeSearchRequest request);
-  EmployeeDto findEmployeeById(EmployeeDto dto);
+  EmployeeDto findEmployeeById(Long id);
   EmployeeDto updateEmployee(Long id,EmployeeUpdateRequest updateRequest);
   void deleteEmployee(Long id);
 

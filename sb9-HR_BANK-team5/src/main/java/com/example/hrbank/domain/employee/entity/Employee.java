@@ -18,6 +18,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -53,7 +54,7 @@ public class Employee extends BaseTimeEntity {
   @JoinColumn(name="profile_image_id")
   private BinaryContent profileImage;
 
-
+  @Builder
   public Employee(Long id, String name, String email, String employeeNumber, String position,
       LocalDate hireDate, EmployeeStatus status, Department department,
       BinaryContent profileImage) {
@@ -68,11 +69,17 @@ public class Employee extends BaseTimeEntity {
     this.profileImage = profileImage;
   }
 
+
+  public void updateEmployee(String newName,String newEmail,String newPosition,LocalDate newHireDate,EmployeeStatus newStatus){
+    this.name= newName;
+    this.email=newEmail;
+    this.position=newPosition;
+    this.hireDate=newHireDate;
+    this.status=newStatus;
+
+  }
   public void changeDepartment(Department newdepartment){
     this.department=newdepartment;
   }
-  public void updateProfile(String name,String position){
-    this.name = name;
-    this.position=position;
-  }
+
 }
