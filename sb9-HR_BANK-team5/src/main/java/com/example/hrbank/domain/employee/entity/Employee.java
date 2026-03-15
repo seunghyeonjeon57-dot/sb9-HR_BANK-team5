@@ -71,8 +71,15 @@ public class Employee extends BaseTimeEntity {
   public void changeDepartment(Department newdepartment){
     this.department=newdepartment;
   }
-  public void updateProfile(String name,String position){
-    this.name = name;
-    this.position=position;
+  public void updateEmployee(String newName,String newEmail,String newPosition,LocalDate newHireDate,EmployeeStatus newStatus){
+    this.name =newName;
+    this.email =newEmail;
+    this.position=newPosition;
+    this.hireDate=newHireDate;
+    this.status = newStatus;
+  }
+  public void resign(){
+    this.status=EmployeeStatus.RESIGNED;
+
   }
 }
