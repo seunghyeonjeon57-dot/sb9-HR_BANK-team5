@@ -11,7 +11,9 @@ import org.mapstruct.Mapper;
 public interface DepartmentMapper {
 
   DepartmentDto toDto(Department department);
+
   List<DepartmentDto> toDtoList(List<Department> entities);
+
   default CursorPageResponseDepartmentDto toCursorPageDto(List<Department> entities, Integer size, Long totalElements, boolean hasNext) {
     List<DepartmentDto> content = toDtoList(entities);
     Long lastId = entities.isEmpty() ? null : entities.get(entities.size()-1).getId();
@@ -19,8 +21,7 @@ public interface DepartmentMapper {
     if (lastId != null) {
       encodedCursor = Base64.getEncoder().encodeToString(String.valueOf(lastId).getBytes());
     }
-
-
     return new CursorPageResponseDepartmentDto(content, encodedCursor,lastId, size, totalElements, hasNext);
   }
+
 }

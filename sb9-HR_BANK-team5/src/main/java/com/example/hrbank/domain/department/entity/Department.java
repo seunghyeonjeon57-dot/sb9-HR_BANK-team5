@@ -41,4 +41,10 @@ public class Department extends BaseTimeEntity {
     this.employeeCount = employeeCount;
   }
 
+  public void update(String name, String description, LocalDate establishedDate) {
+    this.name = name;
+    this.description = description;
+    this.establishedDate = establishedDate;
+  }
+
 }
