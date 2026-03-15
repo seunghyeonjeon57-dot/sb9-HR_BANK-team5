@@ -82,4 +82,11 @@ public class BasicBinaryContentService implements BinaryContentService {
     storage.delete(id);
     repository.delete(content);
   }
+
+  public BinaryContent getEntity(Long id) {
+    return repository.findById(id)
+        .orElseThrow(()-> new NoSuchElementException("존재하지 않는 파일 입니다. ID: " + id));
+
+  }
+
 }
