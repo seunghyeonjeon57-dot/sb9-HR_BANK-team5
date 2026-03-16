@@ -8,7 +8,7 @@ import com.example.hrbank.domain.employee.dto.request.ChangeLogSearchRequest;
 import com.example.hrbank.domain.employee.entity.ChangeLog;
 import com.example.hrbank.domain.employee.entity.Employee;
 import com.example.hrbank.domain.employee.entity.enums.ChannelType;
-import com.example.hrbank.domain.employee.mapper.ChannelLogMapper;
+import com.example.hrbank.domain.employee.mapper.ChangeLogMapper;
 import com.example.hrbank.domain.employee.repository.ChangeLogRepository;
 import com.example.hrbank.domain.employee.repository.EmployeeRepository;
 import com.example.hrbank.domain.employee.service.ChangeLogService;
@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChangeLogServiceImpl implements ChangeLogService {
   private final ChangeLogRepository repository;
-  private final ChannelLogMapper mapper;
+  private final ChangeLogMapper mapper;
   private final EmployeeRepository employeeRepository;
   @Override
   @Transactional
@@ -67,6 +67,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public ChangeLogDetailDto getChangeLogDetail(Long id) {
     ChangeLog log = repository.findById(id).orElseThrow(()-> new EntityNotFoundException("존재하지 않는 id"));
 
@@ -77,6 +78,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
   }
 
   @Override
+  @Transactional
   public long countChangelogs(LocalDateTime fromDate, LocalDateTime toDate) {
     LocalDateTime start = (fromDate != null) ? fromDate : LocalDateTime.now().minusDays(7);
     LocalDateTime end = (toDate != null) ?  toDate : LocalDateTime.now();

@@ -8,9 +8,9 @@ import java.time.LocalDate;
 public record EmployeeTrendDto(
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     LocalDate date,
-    Integer count,
-    Integer change,
-    Number changeRate
+    Long count,
+    Long change,
+    double changeRate
 
 ) {
 

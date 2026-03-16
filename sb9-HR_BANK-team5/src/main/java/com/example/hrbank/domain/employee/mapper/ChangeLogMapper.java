@@ -12,7 +12,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface ChannelLogMapper {
+public interface ChangeLogMapper {
 
   ChangeLogDto toDto(ChangeLog changeLog);
 
@@ -43,6 +43,7 @@ public interface ChannelLogMapper {
       );
 
     }
+  @Mapping(source = "createdAt", target = "at")
   @Mapping(source = "entity.id", target = "id")
   @Mapping(source = "entity.employeeNumber", target = "employeeNumber")
   @Mapping(source = "employee.profileImage.id", target = "profileImageId")
