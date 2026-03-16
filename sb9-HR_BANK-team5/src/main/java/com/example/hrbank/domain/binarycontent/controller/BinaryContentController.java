@@ -38,7 +38,7 @@ public class BinaryContentController {
       .body(binaryContentService.download(id).getBody());
 }}
 
-@DeleteMapping("{id}")
+@DeleteMapping("/{id}")
 public ResponseEntity<Void> delete(
     @PathVariable("id") Long id
 ) {
