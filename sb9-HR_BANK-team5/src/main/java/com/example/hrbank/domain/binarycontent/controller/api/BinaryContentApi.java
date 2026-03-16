@@ -11,10 +11,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 
 @Tag(name = "BinaryContent", description = "BinaryContent API")
 public interface BinaryContentApi {
   //find
+
+
   @Operation(summary = "파일 조회")
   @ApiResponses(value = {
       @ApiResponse(
@@ -24,8 +27,7 @@ public interface BinaryContentApi {
       ),
       @ApiResponse(
           responseCode = "404", description = "없는 파일",
-          content = @Content(
-              examples = @ExampleObject(value = "{id} not found"))
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class))
       )
   })
   ResponseEntity<BinaryContentDto>findById(
@@ -46,15 +48,12 @@ public interface BinaryContentApi {
           responseCode = "200",
           description = "파일 다운 성공",
           content = @Content(
-              mediaType = "application/octet-stream",
               schema = @Schema(type = "string", format = "binary")
           )
       ),
       @ApiResponse(
-          responseCode = "404",
-          description = "없는 파일",
-          content = @Content(
-              examples = @ExampleObject(value = "{id} not found"))
+          responseCode = "404", description = "없는 파일",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class))
       )
   })
   ResponseEntity<Resource>download(
@@ -73,9 +72,8 @@ public interface BinaryContentApi {
           description = "파일 삭제 성공"
       ),
       @ApiResponse(
-          responseCode = "404",
-          description = "없는 파일",
-          content = @Content(examples = @ExampleObject(value = "{id} not found"))
+          responseCode = "404", description = "없는 파일",
+          content = @Content(schema = @Schema(implementation = ErrorResponse.class))
       )
   })
   ResponseEntity<Void> delete (
