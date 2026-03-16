@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -30,10 +31,15 @@ public class BinaryContent extends BaseTimeEntity {
   @Column(name = "file_size", nullable = false)
   private Long fileSize;
 
-  public BinaryContent(String fileName, String contentType, Long fileSize) {
+  @Lob
+  @Column(name = "file_data", nullable = false)
+  private byte[] fileData;
+
+  public BinaryContent(String fileName, String contentType, Long fileSize, byte[] fileData) {
     this.fileName = fileName;
     this.contentType = contentType;
     this.fileSize = fileSize;
+    this.fileData = fileData;
   }
 
 }
