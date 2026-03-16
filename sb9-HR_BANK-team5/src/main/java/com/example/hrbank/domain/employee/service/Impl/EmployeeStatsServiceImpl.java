@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequiredArgsConstructor
 public class EmployeeStatsServiceImpl implements EmployeeStatsService {
       private final EmployeeStatsRepository repository;
-
+  @Transactional
   @Override
   public List<EmployeeTrendDto> getEmployeeTrend(LocalDate from, LocalDate to,String unit) {
     long currentTotal= repository.countEmployeeBefore(from);
@@ -44,7 +45,7 @@ public class EmployeeStatsServiceImpl implements EmployeeStatsService {
     }
     return result;
   }
-
+  @Transactional(readOnly = true)
   @Override
   public List<EmployeeDistributionDto> getEmployeeDistribution(String groupBy,
       EmployeeStatus status) {
@@ -66,6 +67,7 @@ public class EmployeeStatsServiceImpl implements EmployeeStatsService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public long getEmployeeCount(EmployeeStatus status, LocalDate fromDate, LocalDate toDate) {
     return repository.getEmployeeCount(status,fromDate,toDate);
   }

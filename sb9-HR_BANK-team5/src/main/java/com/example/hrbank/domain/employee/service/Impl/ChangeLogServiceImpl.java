@@ -67,6 +67,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public ChangeLogDetailDto getChangeLogDetail(Long id) {
     ChangeLog log = repository.findById(id).orElseThrow(()-> new EntityNotFoundException("존재하지 않는 id"));
 
@@ -77,6 +78,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
   }
 
   @Override
+  @Transactional
   public long countChangelogs(LocalDateTime fromDate, LocalDateTime toDate) {
     LocalDateTime start = (fromDate != null) ? fromDate : LocalDateTime.now().minusDays(7);
     LocalDateTime end = (toDate != null) ?  toDate : LocalDateTime.now();
