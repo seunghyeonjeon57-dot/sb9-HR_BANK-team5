@@ -37,7 +37,7 @@ public class BasicDepartmentService implements DepartmentService {
     LocalDate establishedDate = departmentCreateRequest.establishedDate();
 
     if(departmentRepository.existsByName(name))
-      throw new IllegalArgumentException("Departmentname with email " + name + " already exists");
+      throw new IllegalArgumentException("Departmentname with name " + name + " already exists");
 
     Department department = new Department(name, description, establishedDate, employeeCount);
     departmentRepository.save(department);
