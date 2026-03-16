@@ -1,5 +1,6 @@
 package com.example.hrbank.domain.backup.service;
 
+import com.example.hrbank.domain.backup.dto.request.BackupSearchRequest;
 import com.example.hrbank.domain.backup.dto.response.BackupCursorPageResponse;
 import com.example.hrbank.domain.backup.dto.response.BackupResponse;
 import com.example.hrbank.domain.backup.entity.BackupHistory;
@@ -76,7 +77,6 @@ public class BasicBackupService implements BackupService {
     try {
       Long fileId = performCsvBackup();
       history.complete(fileId);
-
     } catch (Exception e) {
       log.error("Backup failed: ", e);
       Long errorLogId = saveErrorLog(e);
@@ -88,15 +88,9 @@ public class BasicBackupService implements BackupService {
 
   @Override
   @Transactional(readOnly = true)
-  public BackupCursorPageResponse getBackupList(
-      String worker, BackupStatus status, LocalDateTime from, LocalDateTime to,
-      Long idAfter, Integer size, String sortField, String sortDirection) {
-
-    int pageSize = (size != null) ? size : 10;
-
-    List<BackupHistory> entities = backupRepository.searchBackups(
-        worker, status, from, to, idAfter, pageSize, sortField, sortDirection
-    );
+  public BackupCursorPageResponse getBackupList(BackupSearchRequest request) {
+    int pageSize = request.size();
+    List<BackupHistory> entities = backupRepository.searchBackups(request);
 
     boolean hasNext = entities.size() > pageSize;
     List<BackupHistory> content = hasNext ? entities.subList(0, pageSize) : entities;
@@ -104,7 +98,7 @@ public class BasicBackupService implements BackupService {
     Long nextIdAfter = (hasNext && !content.isEmpty())
         ? content.get(content.size() - 1).getId() : null;
 
-    long totalElements = backupRepository.countBackups(worker, status, from, to);
+    long totalElements = backupRepository.countBackups(request);
 
     return backupMapper.toPageResponse(
         content,
@@ -126,27 +120,19 @@ public class BasicBackupService implements BackupService {
 
   private Long performCsvBackup() throws Exception {
     Path tempFile = Files.createTempFile("backup_", ".csv");
-
     try (Stream<Employee> employeeStream = employeeRepository.streamAllBy();
         PrintWriter writer = new PrintWriter(Files.newBufferedWriter(tempFile))) {
-
       writer.println("ID,Name,Email,EmployeeNumber,Department,Position,HireDate,Status");
-
-      employeeStream.forEach(emp -> {
-        writer.printf("%d,%s,%s,%s,%s,%s,%s,%s%n",
-            emp.getId(), emp.getName(), emp.getEmail(), emp.getEmployeeNumber(),
-            emp.getDepartment() != null ? emp.getDepartment().getName() : "N/A",
-            emp.getPosition(), emp.getHireDate(), emp.getStatus());
-      });
+      employeeStream.forEach(emp -> writer.printf("%d,%s,%s,%s,%s,%s,%s,%s%n",
+          emp.getId(), emp.getName(), emp.getEmail(), emp.getEmployeeNumber(),
+          emp.getDepartment() != null ? emp.getDepartment().getName() : "N/A",
+          emp.getPosition(), emp.getHireDate(), emp.getStatus()));
       writer.flush();
     }
-
     BinaryContentRequest request = new BinaryContentRequest(
         tempFile.getFileName().toString(), "text/csv", Files.size(tempFile));
-
     BinaryContentDto savedFile = binaryContentService.save(request, tempFile);
     Files.deleteIfExists(tempFile);
-
     return savedFile.id();
   }
 
@@ -156,10 +142,8 @@ public class BasicBackupService implements BackupService {
       StringWriter sw = new StringWriter();
       e.printStackTrace(new PrintWriter(sw));
       Files.writeString(logFile, sw.toString());
-
       BinaryContentRequest request = new BinaryContentRequest(
           logFile.getFileName().toString(), "text/plain", Files.size(logFile));
-
       BinaryContentDto savedLog = binaryContentService.save(request, logFile);
       Files.deleteIfExists(logFile);
       return savedLog.id();
