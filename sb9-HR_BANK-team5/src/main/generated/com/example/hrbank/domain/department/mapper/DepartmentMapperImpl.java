@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-03-16T13:49:20+0900",
-    comments = "version: 1.5.5.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.3.1.jar, environment: Java 17.0.18 (Oracle Corporation)"
+    date = "2026-03-16T18:26:58+0900",
+    comments = "version: 1.5.5.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.3.1.jar, environment: Java 17.0.18 (Amazon.com Inc.)"
 )
 @Component
 public class DepartmentMapperImpl implements DepartmentMapper {

@@ -9,8 +9,11 @@ import com.example.hrbank.domain.department.entity.Department;
 import com.example.hrbank.domain.department.mapper.DepartmentMapper;
 import com.example.hrbank.domain.department.repository.DepartmentRepository;
 import com.example.hrbank.domain.department.service.DepartmentService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -67,15 +70,28 @@ public class BasicDepartmentService implements DepartmentService {
 
 //  한 페이지에 보여줄 개수
     int size = request.size() != null ? request.size() : 10;
-//  idAfter는 마지막으로 본 데이터(id). 값이 없으면 0부터 시작
-    Long idAfter = request.idAfter() != null ? request.idAfter() : 0L;
-
+//  cursor 기반 idAfter
+    Long idAfter = 0L;
+    if (request.cursor() != null && !request.cursor().isBlank()) {
+      try {
+        byte[] decodedBytes = Base64.getDecoder().decode(request.cursor());
+        String json = new String(decodedBytes);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> map = objectMapper.readValue(json, Map.class);
+        idAfter = ((Number) map.get("id")).longValue();
+      } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        // cursor 파싱 실패 시 기본값 0 사용
+        idAfter = 0L;
+      }
+    } else if (request.idAfter() != null) {
+      idAfter = request.idAfter();
+    }
     // 정렬 필드 기본값
-    String sortField = request.sortField() != null ? request.sortField() : "id";
+    String sortField = request.sortField() != null ? request.sortField() : "establishedDate";
 
     //허용된 정렬 필드 검증
     if (!List.of("name", "establishedDate").contains(sortField)) {
-      sortField = "name";
+      sortField = "establishedDate";
     }
 
 // 정렬 방향 기본값

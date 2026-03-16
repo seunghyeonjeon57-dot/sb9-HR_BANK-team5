@@ -1,7 +1,6 @@
 package com.example.hrbank.domain.department.repository;
 
 import com.example.hrbank.domain.department.entity.Department;
-import com.example.hrbank.domain.department.repository.custom.DepartmentRepositoryCustom;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
