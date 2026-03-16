@@ -12,7 +12,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface ChannelLogMapper {
+public interface ChangeLogMapper {
 
   ChangeLogDto toDto(ChangeLog changeLog);
 

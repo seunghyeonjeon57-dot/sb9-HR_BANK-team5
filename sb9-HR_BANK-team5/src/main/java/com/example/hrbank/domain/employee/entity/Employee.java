@@ -40,6 +40,8 @@ public class Employee extends BaseTimeEntity {
   private String position;
   @Column(name="hire_date",nullable = false)
   private LocalDate hireDate;
+  @Column(name="resignation_date")
+  private LocalDate resignationDate;
 
   @Enumerated(EnumType.STRING)
   @Column(name="status",nullable = false,columnDefinition = "employee_status")
@@ -55,7 +57,7 @@ public class Employee extends BaseTimeEntity {
 
 
   public Employee(Long id, String name, String email, String employeeNumber, String position,
-      LocalDate hireDate, EmployeeStatus status, Department department,
+      LocalDate hireDate,LocalDate resignationDate, EmployeeStatus status, Department department,
       BinaryContent profileImage) {
     this.id = id;
     this.name = name;
@@ -63,6 +65,7 @@ public class Employee extends BaseTimeEntity {
     this.employeeNumber = employeeNumber;
     this.position = position;
     this.hireDate = hireDate;
+    this.resignationDate=resignationDate;
     this.status = status;
     this.department = department;
     this.profileImage = profileImage;

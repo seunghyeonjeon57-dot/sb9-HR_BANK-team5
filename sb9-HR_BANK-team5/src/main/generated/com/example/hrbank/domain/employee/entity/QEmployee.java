@@ -43,6 +43,8 @@ public class QEmployee extends EntityPathBase<Employee> {
 
     public final com.example.hrbank.domain.binarycontent.entity.QBinaryContent profileImage;
 
+    public final DatePath<java.time.LocalDate> resignationDate = createDate("resignationDate", java.time.LocalDate.class);
+
     public final EnumPath<com.example.hrbank.domain.employee.entity.enums.EmployeeStatus> status = createEnum("status", com.example.hrbank.domain.employee.entity.enums.EmployeeStatus.class);
 
     //inherited
