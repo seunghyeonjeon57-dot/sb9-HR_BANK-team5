@@ -13,6 +13,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,38 +41,86 @@ public class BasicDepartmentService implements DepartmentService {
     return departmentMapper.toDto(department);
   }
 
-  //"부서 목록 상세 조회"
   @Override
   @Transactional(readOnly = true)
-  public DepartmentDto find(Long id) {
+  public Department findEntityById(Long id) {
     return departmentRepository.findById(id)
-        .map(departmentMapper::toDto)
         .orElseThrow(() -> new NoSuchElementException("Department with id " + id + " not found"));
   }
 
-  //커서 이건 "부서 목록 조회"
+
+  //부서 상세 조회
   @Override
   @Transactional(readOnly = true)
-  public CursorPageResponseDepartmentDto findAll(DepartmentSearchRequest departmentSearchRequest) {
-    List<Department> departments = List.of();
+  public DepartmentDto find(Long id) {
+
+    Department department = findEntityById(id);
+
+    return departmentMapper.toDto(department);
+  }
+
+  //부서 목록 조회
+  @Override
+  @Transactional(readOnly = true)
+  public CursorPageResponseDepartmentDto findAll(DepartmentSearchRequest request) {
+
+//  한 페이지에 보여줄 개수
+    int size = request.size() != null ? request.size() : 10;
+//  idAfter는 마지막으로 본 데이터(id). 값이 없으면 0부터 시작
+    Long idAfter = request.idAfter() != null ? request.idAfter() : 0L;
+//    한 페이지에 3개를 보여줄려고 size = 3을 하고, db에서는 +1을 한 4를 조회한다.
+//    그럼 3개 이상이 있다는 뜻이니까 3개만 조회했을 경우 다음 페이지가 있다는 것을 알 수 있다.
+    Pageable pageable = PageRequest.of(0, size + 1);
+
+//    idAfter = 5 , size = 3 이면, 조회 결과(departments) : 6,7,8,9
+    List<Department> departments =
+        departmentRepository.findByIdGreaterThanOrderByIdAsc(idAfter, pageable);
+
+//    다음 페이지 존재 여부 판단. size = 3, 조회 = 4 이면 다음 페이지가 있음
+    boolean hasNext = departments.size() > size;
+
+//    초과 데이터 제거. 저 위에서 말한 부분. 6,7,8,9 중 실제로는 6,7,8만 반환
+    if (hasNext) {
+      departments = departments.subList(0, size);
+    }
+//    전체 부서 개수 조회
+    long totalElements = departmentRepository.count();
 
     return departmentMapper.toCursorPageDto(
         departments,
-        0,
-        0L,
-        false
+        size,
+        totalElements,
+        hasNext
     );
   }
 
   @Override
   @Transactional
-  public DepartmentDto update(Long id, DepartmentUpdateRequest departmentUpdateRequest) {
-    return null;
+  public DepartmentDto update(Long id, DepartmentUpdateRequest request) {
+
+    Department department = findEntityById(id);
+
+    if (!department.getName().equals(request.name())
+        && departmentRepository.existsByName(request.name())) {
+      throw new IllegalArgumentException("Department name already exists");
+    }
+
+    department.update(
+        request.name(),
+        request.description(),
+        request.establishedDate()
+    );
+
+    return departmentMapper.toDto(department);
   }
+
 
   @Override
   @Transactional
   public void delete(Long id) {
 
+    Department department = findEntityById(id);
+
+    departmentRepository.delete(department);
   }
 }
