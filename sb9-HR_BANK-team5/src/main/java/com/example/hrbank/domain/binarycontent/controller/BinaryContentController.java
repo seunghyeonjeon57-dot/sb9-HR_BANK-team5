@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class BinaryContentController {
   private final BinaryContentService binaryContentService;
 
-  //find
 @GetMapping("/{id}")
   public ResponseEntity<BinaryContentDto> findById(
       @PathVariable("id") Long id
@@ -26,7 +25,6 @@ public class BinaryContentController {
     return ResponseEntity.ok(binaryContentDto);
   }
 
-  //download
 @GetMapping("/{id}/download")
   public ResponseEntity<Resource> download(
       @PathVariable("id") Long id)
