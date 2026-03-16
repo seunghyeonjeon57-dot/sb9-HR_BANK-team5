@@ -2,7 +2,6 @@ package com.example.hrbank.domain.backup.mapper;
 
 import com.example.hrbank.domain.backup.dto.response.BackupCursorPageResponse;
 import com.example.hrbank.domain.backup.dto.response.BackupResponse;
-import com.example.hrbank.domain.backup.dto.response.BackupCursorPageResponse;
 import com.example.hrbank.domain.backup.entity.BackupHistory;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

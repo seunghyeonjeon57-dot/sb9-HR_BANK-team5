@@ -1,10 +1,14 @@
 package com.example.hrbank.domain.backup.service;
 
+import com.example.hrbank.domain.backup.dto.response.BackupCursorPageResponse;
 import com.example.hrbank.domain.backup.dto.response.BackupResponse;
 import com.example.hrbank.domain.backup.entity.BackupHistory;
 import com.example.hrbank.domain.backup.entity.BackupStatus;
 import com.example.hrbank.domain.backup.mapper.BackupMapper;
 import com.example.hrbank.domain.backup.repository.BackupRepository;
+import com.example.hrbank.domain.binarycontent.dto.data.BinaryContentDto;
+import com.example.hrbank.domain.binarycontent.dto.request.BinaryContentRequest;
+import com.example.hrbank.domain.binarycontent.service.BinaryContentService;
 import com.example.hrbank.domain.employee.entity.Employee;
 import com.example.hrbank.domain.employee.repository.ChangeLogRepository;
 import com.example.hrbank.domain.employee.repository.EmployeeRepository;
@@ -16,9 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -30,8 +36,7 @@ public class BasicBackupService implements BackupService {
   private final EmployeeRepository employeeRepository;
   private final ChangeLogRepository changeLogRepository;
   private final BackupMapper backupMapper;
-  // 선우님의 파일 저장 서비스 받기
-  // private final BinaryContentService binaryContentService;
+  private final BinaryContentService binaryContentService;
 
   @Override
   @Transactional
@@ -42,9 +47,14 @@ public class BasicBackupService implements BackupService {
   @Override
   @Transactional
   public BackupResponse runBackup(String worker) {
+    if (backupRepository.existsByStatus(BackupStatus.IN_PROGRESS)) {
+      throw new BusinessException(ErrorCode.BACKUP_ALREADY_IN_PROGRESS);
+    }
+
     LocalDateTime lastBackupTime = backupRepository.findFirstByStatusOrderByStartedAtDesc(BackupStatus.COMPLETED)
         .map(BackupHistory::getStartedAt)
         .orElse(LocalDateTime.MIN);
+
     boolean needsBackup = changeLogRepository.existsByUpdatedAtAfter(lastBackupTime);
 
     if (!needsBackup) {
@@ -65,15 +75,53 @@ public class BasicBackupService implements BackupService {
 
     try {
       Long fileId = performCsvBackup();
-
       history.complete(fileId);
 
     } catch (Exception e) {
       log.error("Backup failed: ", e);
-      history.fail(null);
+      Long errorLogId = saveErrorLog(e);
+      history.fail(errorLogId);
     }
 
     return backupMapper.toResponse(history);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BackupCursorPageResponse getBackupList(
+      String worker, BackupStatus status, LocalDateTime from, LocalDateTime to,
+      Long idAfter, Integer size, String sortField, String sortDirection) {
+
+    int pageSize = (size != null) ? size : 10;
+
+    List<BackupHistory> entities = backupRepository.searchBackups(
+        worker, status, from, to, idAfter, pageSize, sortField, sortDirection
+    );
+
+    boolean hasNext = entities.size() > pageSize;
+    List<BackupHistory> content = hasNext ? entities.subList(0, pageSize) : entities;
+
+    Long nextIdAfter = (hasNext && !content.isEmpty())
+        ? content.get(content.size() - 1).getId() : null;
+
+    long totalElements = backupRepository.countBackups(worker, status, from, to);
+
+    return backupMapper.toPageResponse(
+        content,
+        nextIdAfter != null ? nextIdAfter.toString() : null,
+        nextIdAfter,
+        pageSize,
+        totalElements,
+        hasNext
+    );
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BackupResponse getLatestBackup(BackupStatus status) {
+    return backupRepository.findFirstByStatusOrderByStartedAtDesc(status)
+        .map(backupMapper::toResponse)
+        .orElseThrow(() -> new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR));
   }
 
   private Long performCsvBackup() throws Exception {
@@ -87,20 +135,37 @@ public class BasicBackupService implements BackupService {
       employeeStream.forEach(emp -> {
         writer.printf("%d,%s,%s,%s,%s,%s,%s,%s%n",
             emp.getId(), emp.getName(), emp.getEmail(), emp.getEmployeeNumber(),
-            emp.getDepartment() != null ? emp.getDepartment().getName() : "",
+            emp.getDepartment() != null ? emp.getDepartment().getName() : "N/A",
             emp.getPosition(), emp.getHireDate(), emp.getStatus());
       });
+      writer.flush();
     }
 
-    log.info("Temporary backup file created at: {}", tempFile.toAbsolutePath());
-    return 1L;
+    BinaryContentRequest request = new BinaryContentRequest(
+        tempFile.getFileName().toString(), "text/csv", Files.size(tempFile));
+
+    BinaryContentDto savedFile = binaryContentService.save(request, tempFile);
+    Files.deleteIfExists(tempFile);
+
+    return savedFile.id();
   }
 
-  @Override
-  @Transactional(readOnly = true)
-  public BackupResponse getLatestBackup(BackupStatus status) {
-    return backupRepository.findFirstByStatusOrderByStartedAtDesc(status)
-        .map(backupMapper::toResponse)
-        .orElseThrow(() -> new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR));
+  private Long saveErrorLog(Exception e) {
+    try {
+      Path logFile = Files.createTempFile("error_", ".log");
+      StringWriter sw = new StringWriter();
+      e.printStackTrace(new PrintWriter(sw));
+      Files.writeString(logFile, sw.toString());
+
+      BinaryContentRequest request = new BinaryContentRequest(
+          logFile.getFileName().toString(), "text/plain", Files.size(logFile));
+
+      BinaryContentDto savedLog = binaryContentService.save(request, logFile);
+      Files.deleteIfExists(logFile);
+      return savedLog.id();
+    } catch (Exception ex) {
+      log.error("Failed to save error log file", ex);
+      return null;
+    }
   }
 }
