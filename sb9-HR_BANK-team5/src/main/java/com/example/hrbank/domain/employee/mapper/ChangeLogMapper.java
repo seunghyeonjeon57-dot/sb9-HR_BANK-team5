@@ -43,6 +43,7 @@ public interface ChangeLogMapper {
       );
 
     }
+  @Mapping(source = "createdAt", target = "at")
   @Mapping(source = "entity.id", target = "id")
   @Mapping(source = "entity.employeeNumber", target = "employeeNumber")
   @Mapping(source = "employee.profileImage.id", target = "profileImageId")

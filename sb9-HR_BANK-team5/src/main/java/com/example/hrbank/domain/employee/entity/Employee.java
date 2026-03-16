@@ -44,7 +44,7 @@ public class Employee extends BaseTimeEntity {
   private LocalDate resignationDate;
 
   @Enumerated(EnumType.STRING)
-  @Column(name="status",nullable = false,columnDefinition = "employee_status")
+  @Column(name="status",nullable = false)
   private EmployeeStatus status;
 
   @ManyToOne(fetch = FetchType.LAZY)

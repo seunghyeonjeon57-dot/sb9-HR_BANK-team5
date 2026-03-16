@@ -33,7 +33,7 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
             ltLastId(request.lastId())
 
         )
-        .orderBy(createOrderSpecifier(request.sortField()))
+        .orderBy(createOrderSpecifier(request.sortField(), request.sortDirection()))
         .limit(request.size() + 1)
         .fetch();
   }
@@ -79,12 +79,7 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
     return lastId != null ? changeLog.id.lt(lastId) : null;
   }
 
-  private OrderSpecifier<?> createOrderSpecifier(String sortField) {
-    if ("ipAddress".equals(sortField)) {
-      return changeLog.ipAddress.asc();
-    }
-    return changeLog.createdAt.desc();
-  }
+
 
 
   @Override
@@ -100,6 +95,21 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
         .fetchOne();
 
     return count !=null ?count : 0L;
+  }
+  private OrderSpecifier<?> createOrderSpecifier(String sortField, String sortDirection) {
+    boolean isAsc = "asc".equalsIgnoreCase(sortDirection);
+
+
+    if ("at".equals(sortField)) {
+      return isAsc ? changeLog.createdAt.asc() : changeLog.createdAt.desc();
+    }
+
+    if ("ipAddress".equals(sortField)) {
+      return isAsc ? changeLog.ipAddress.asc() : changeLog.ipAddress.desc();
+    }
+
+
+    return changeLog.createdAt.desc();
   }
 
 }

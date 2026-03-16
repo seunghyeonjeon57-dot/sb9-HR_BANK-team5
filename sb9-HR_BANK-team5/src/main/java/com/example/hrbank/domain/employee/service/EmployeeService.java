@@ -10,11 +10,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface EmployeeService {
-  EmployeeDto create(EmployeeCreateRequest request, BinaryContent profile);
-  CursorPageResponseEmployeeDto getEmployeePage(EmployeeSearchRequest request);
-  EmployeeDto findEmployeeById(Long id);
-  EmployeeDto updateEmployee(Long id,EmployeeUpdateRequest updateRequest,HttpServletRequest httpServletRequest);
-  void deleteEmployee(Long id, HttpServletRequest request);
+  EmployeeDto createEmployee(EmployeeCreateRequest request, BinaryContent profile);
+  CursorPageResponseEmployeeDto searchEmployees(EmployeeSearchRequest request);
+  EmployeeDto searchEmployeeById(Long id);
+  EmployeeDto updateEmployee(Long id,EmployeeUpdateRequest updateRequest,String ipAddress);
+  void deleteEmployee(Long id, String ipAddress);
 
 
 }

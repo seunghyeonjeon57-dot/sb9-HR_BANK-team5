@@ -22,14 +22,14 @@ public class EmployeeStatsServiceImpl implements EmployeeStatsService {
       private final EmployeeStatsRepository repository;
 
   @Override
-  public List<EmployeeTrendDto> getEmployeeTrend(LocalDate from, LocalDate to) {
+  public List<EmployeeTrendDto> getEmployeeTrend(LocalDate from, LocalDate to,String unit) {
     long currentTotal= repository.countEmployeeBefore(from);
     List<EmployeeEventCount> events= repository.getEventCounts(from,to);
 
     Map<LocalDate,EmployeeEventCount> eventMap = events.stream()
         .collect(Collectors.toMap(EmployeeEventCount::date,e->e));
     List<EmployeeTrendDto> result = new ArrayList<>();
-    for(LocalDate date = from; !date.isAfter(to); date=date.plusDays(1)){
+    for(LocalDate date = from; !date.isAfter(to); date=getNextDate(date,unit)){
       EmployeeEventCount event = eventMap.getOrDefault(date,new EmployeeEventCount(date,0L,0L));
       long change = event.joinCount()- event.quitCount();
       long previousTotal = currentTotal;
@@ -68,5 +68,15 @@ public class EmployeeStatsServiceImpl implements EmployeeStatsService {
   @Override
   public long getEmployeeCount(EmployeeStatus status, LocalDate fromDate, LocalDate toDate) {
     return repository.getEmployeeCount(status,fromDate,toDate);
+  }
+  private LocalDate getNextDate(LocalDate date, String unit) {
+    return switch (unit.toLowerCase()) {
+      case "day" -> date.plusDays(1);
+      case "week" -> date.plusWeeks(1);
+      case "month" -> date.plusMonths(1);
+      case "quarter" -> date.plusMonths(3);
+      case "year" -> date.plusYears(1);
+      default -> date.plusMonths(1);
+    };
   }
 }

@@ -36,13 +36,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
   @Transactional
   @Override
-  public EmployeeDto create(EmployeeCreateRequest request, BinaryContent profile) {
+  public EmployeeDto createEmployee(EmployeeCreateRequest request, BinaryContent profile) {
     return null;
   }
 
   @Transactional(readOnly = true)
   @Override
-  public CursorPageResponseEmployeeDto getEmployeePage(EmployeeSearchRequest request) {
+  public CursorPageResponseEmployeeDto searchEmployees(EmployeeSearchRequest request) {
     List<Employee> employees = repository.searchEmployee(request);
     long totalElements = repository.countEmployee(request);
     boolean hasNext = employees.size()>request.size();
@@ -56,7 +56,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   }
   @Transactional
   @Override
-  public EmployeeDto updateEmployee(Long id, EmployeeUpdateRequest request,HttpServletRequest httpServletRequest) {
+  public EmployeeDto updateEmployee(Long id, EmployeeUpdateRequest request,String ipAddress) {
     Employee employee= repository.findById(id)
         .orElseThrow(()-> new NoSuchElementException("사원을 찾을 수 없습니다."));
     if(!employee.getEmail().equals(request.email())){
@@ -67,13 +67,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     if(employee.getStatus()!= EmployeeStatus.RESIGNED && request.status().equals(EmployeeStatus.RESIGNED)){
       employee.resign();
     }
-    String actualIp = IpUtil.getUserIp(httpServletRequest);
+
 
     ChangeLog log = ChangeLog.builder()
         .type(ChannelType.UPDATED)
         .employeeNumber(employee.getEmployeeNumber())
         .memo(request.memo())
-        .ipAddress(actualIp)
+        .ipAddress(ipAddress)
         .build();
 
     if (!employee.getName().equals(request.name())) {
@@ -92,7 +92,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
   @Override
   @Transactional(readOnly = true)
-  public EmployeeDto findEmployeeById(Long id)
+  public EmployeeDto searchEmployeeById(Long id)
   {
     return repository.findWithDetailsById(id).map(mapper::toDto)
         .orElseThrow(()->new NoSuchElementException("해당 Id를 가진 사원이 없습니다."));
@@ -100,17 +100,17 @@ public class EmployeeServiceImpl implements EmployeeService {
 
   @Override
   @Transactional
-  public void deleteEmployee(Long id, HttpServletRequest request) {
+  public void deleteEmployee(Long id, String ipAddress) {
     Employee employee = repository.findById(id)
         .orElseThrow(()->new NoSuchElementException("사원이 없습니다."));
 
-    String actualIp = IpUtil.getUserIp(request);
+
 
     ChangeLog log = ChangeLog.builder()
         .type(ChannelType.DELETED)
         .employeeNumber(employee.getEmployeeNumber())
         .memo("직원을 삭제합니다")
-        .ipAddress(actualIp)
+        .ipAddress(ipAddress)
         .build();
     changeLogRepository.save(log);
     if(employee.getProfileImage()!=null){

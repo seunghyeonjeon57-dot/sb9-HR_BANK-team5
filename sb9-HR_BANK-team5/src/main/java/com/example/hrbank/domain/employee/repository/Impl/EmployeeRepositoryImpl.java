@@ -9,6 +9,7 @@ import com.example.hrbank.domain.employee.entity.QEmployee;
 import com.example.hrbank.domain.employee.entity.enums.EmployeeStatus;
 import com.example.hrbank.domain.employee.repository.custom.ChangeLogRepositoryCustom;
 import com.example.hrbank.domain.employee.repository.custom.EmployeeRepositoryCustom;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
@@ -33,9 +34,9 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
             containsEmployeeNumber(request.employeeNumber()),
             eqEmployeeStatus(request.status()),
             betweenHireDate(request.hireDateFrom(),request.hireDateTo()),
-            ltEmployeeId(request.id())
+            pagingCondition(request.idAfter(),request.sortDirection())
         )
-        .orderBy(employee.id.desc())
+        .orderBy(getSortOrder(request.sortField(),request.sortDirection()))
         .limit(request.size()+1)
         .fetch();
   }
@@ -93,6 +94,24 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
   private BooleanExpression ltEmployeeId(Long lastId){
     if(lastId==null) return null;
     return employee.id.lt(lastId);
+  }
+  private BooleanExpression pagingCondition(Long lastId, String direction) {
+    if (lastId == null) return null;
+    return "DESC".equalsIgnoreCase(direction) ? employee.id.lt(lastId) : employee.id.gt(lastId);
+  }
+  private OrderSpecifier<?>[] getSortOrder(String field, String direction) {
+    com.querydsl.core.types.Order order = "DESC".equalsIgnoreCase(direction) ?
+        com.querydsl.core.types.Order.DESC : com.querydsl.core.types.Order.ASC;
+
+    OrderSpecifier<?> mainOrder = switch (field != null ? field : "id") {
+      case "name" -> new OrderSpecifier<>(order, employee.name);
+      case "employeeNumber" -> new OrderSpecifier<>(order, employee.employeeNumber);
+      case "hireDate" -> new OrderSpecifier<>(order, employee.hireDate);
+      default -> new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, employee.id);
+    };
+
+    // 팩트: 중복 값 대비 보조 정렬(id)을 추가해야 페이징이 안 꼬입니다.
+    return new OrderSpecifier[]{mainOrder, new OrderSpecifier<>(order, employee.id)};
   }
 
 }
