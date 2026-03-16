@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface EmployeeRepositoryCustom {
   public List<Employee> searchEmployee(EmployeeSearchRequest request);
   public Long countEmployee(EmployeeSearchRequest request);
-  public Employee updateEmployee(EmployeeUpdateRequest request);
+
 
 }

@@ -83,6 +83,7 @@ public class Employee extends BaseTimeEntity {
   }
   public void resign(){
     this.status=EmployeeStatus.RESIGNED;
+    this.resignationDate = LocalDate.now();
 
   }
 }

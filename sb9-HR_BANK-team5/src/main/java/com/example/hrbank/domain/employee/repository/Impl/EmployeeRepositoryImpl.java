@@ -54,10 +54,6 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
         .fetchOne();
   }
 
-  @Override
-  public Employee updateEmployee(EmployeeUpdateRequest request) {
-    return null;
-  }
 
 
 

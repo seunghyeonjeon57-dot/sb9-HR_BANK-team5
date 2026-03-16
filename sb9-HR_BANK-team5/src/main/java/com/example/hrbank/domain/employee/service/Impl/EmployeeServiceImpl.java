@@ -17,6 +17,8 @@ import com.example.hrbank.domain.employee.repository.ChangeLogRepository;
 
 import com.example.hrbank.domain.employee.repository.EmployeeRepository;
 import com.example.hrbank.domain.employee.service.EmployeeService;
+import com.example.hrbank.global.util.IpUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +56,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   }
   @Transactional
   @Override
-  public EmployeeDto updateEmployee(Long id, EmployeeUpdateRequest request) {
+  public EmployeeDto updateEmployee(Long id, EmployeeUpdateRequest request,HttpServletRequest httpServletRequest) {
     Employee employee= repository.findById(id)
         .orElseThrow(()-> new NoSuchElementException("사원을 찾을 수 없습니다."));
     if(!employee.getEmail().equals(request.email())){
@@ -65,12 +67,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     if(employee.getStatus()!= EmployeeStatus.RESIGNED && request.status().equals(EmployeeStatus.RESIGNED)){
       employee.resign();
     }
+    String actualIp = IpUtil.getUserIp(httpServletRequest);
 
     ChangeLog log = ChangeLog.builder()
         .type(ChannelType.UPDATED)
         .employeeNumber(employee.getEmployeeNumber())
         .memo(request.memo())
-        .ipAddress("192.168.0.1")
+        .ipAddress(actualIp)
         .build();
 
     if (!employee.getName().equals(request.name())) {
@@ -97,15 +100,17 @@ public class EmployeeServiceImpl implements EmployeeService {
 
   @Override
   @Transactional
-  public void deleteEmployee(Long id) {
+  public void deleteEmployee(Long id, HttpServletRequest request) {
     Employee employee = repository.findById(id)
         .orElseThrow(()->new NoSuchElementException("사원이 없습니다."));
+
+    String actualIp = IpUtil.getUserIp(request);
 
     ChangeLog log = ChangeLog.builder()
         .type(ChannelType.DELETED)
         .employeeNumber(employee.getEmployeeNumber())
         .memo("직원을 삭제합니다")
-        .ipAddress("192.168.0.1")
+        .ipAddress(actualIp)
         .build();
     changeLogRepository.save(log);
     if(employee.getProfileImage()!=null){

@@ -32,8 +32,9 @@ public class EmployeeStatsServiceImpl implements EmployeeStatsService {
     for(LocalDate date = from; !date.isAfter(to); date=date.plusDays(1)){
       EmployeeEventCount event = eventMap.getOrDefault(date,new EmployeeEventCount(date,0L,0L));
       long change = event.joinCount()- event.quitCount();
-      currentTotal+=change;
-      double rate = (currentTotal ==0) ? 0.0 : (double) change/currentTotal * 100;
+      long previousTotal = currentTotal;
+      currentTotal += change;
+      double rate = (previousTotal ==0) ? 0.0 : (double) change/previousTotal * 100;
       result.add(new EmployeeTrendDto(
           date,
           currentTotal,
