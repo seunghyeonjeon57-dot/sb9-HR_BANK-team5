@@ -22,7 +22,7 @@ public class LocalStorage implements Storage {
   private final Path root;
 
   public LocalStorage(
-      @Value("${./data/storage}") Path root
+      @Value("${app.storage.path}") Path root
   ) {
     this.root = root;
   }
