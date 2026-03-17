@@ -1,14 +1,11 @@
-package com.example.hrbank.domain.employee.repository.Impl;
+package com.example.hrbank.domain.employee.repository;
 
 import static com.example.hrbank.domain.department.entity.QDepartment.department;
 
 import com.example.hrbank.domain.employee.dto.request.EmployeeSearchRequest;
-import com.example.hrbank.domain.employee.dto.request.EmployeeUpdateRequest;
 import com.example.hrbank.domain.employee.entity.Employee;
 import com.example.hrbank.domain.employee.entity.QEmployee;
 import com.example.hrbank.domain.employee.entity.enums.EmployeeStatus;
-import com.example.hrbank.domain.employee.repository.custom.ChangeLogRepositoryCustom;
-import com.example.hrbank.domain.employee.repository.custom.EmployeeRepositoryCustom;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -21,10 +18,10 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
   private final JPAQueryFactory factory;
-  private final QEmployee employee;
+  private final QEmployee employee=QEmployee.employee;
 
   @Override
-  public List<Employee> searchEmployee(EmployeeSearchRequest request) {
+  public List<Employee> totalEmployee(EmployeeSearchRequest request) {
     return factory.selectFrom(employee)
         .leftJoin(employee.department, department).fetchJoin()
         .where(
@@ -42,7 +39,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
   }
 
   @Override
-  public Long countEmployee(EmployeeSearchRequest request) {
+  public Long totalCountEmployee(EmployeeSearchRequest request) {
     return factory.select(employee.count())
         .from(employee)
         .leftJoin(employee.department,department)

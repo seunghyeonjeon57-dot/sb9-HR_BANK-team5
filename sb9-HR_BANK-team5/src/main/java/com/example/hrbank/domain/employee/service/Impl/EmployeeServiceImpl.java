@@ -90,8 +90,8 @@ public class EmployeeServiceImpl implements EmployeeService {
   @Transactional(readOnly = true)
   @Override
   public CursorPageResponseEmployeeDto searchEmployees(EmployeeSearchRequest request) {
-    List<Employee> employees = repository.searchEmployee(request);
-    long totalElements = repository.countEmployee(request);
+    List<Employee> employees = repository.totalEmployee(request);
+    long totalElements = repository.totalCountEmployee(request);
     boolean hasNext = employees.size()>request.size();
     List<Employee> resultEmployees = hasNext ? employees.subList(0, request.size()):employees;
     return mapper.toCursorPageResponse(
@@ -173,7 +173,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   @Transactional(readOnly = true)
   public EmployeeDto searchEmployeeById(Long id)
   {
-    return repository.findWithDetailsById(id).map(mapper::toDto)
+    return repository.findById(id).map(mapper::toDto)
         .orElseThrow(()->new NoSuchElementException("해당 Id를 가진 사원이 없습니다."));
   }
 
