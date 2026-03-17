@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.websocket.Decoder.Binary;
 import java.time.LocalDate;
@@ -89,5 +90,12 @@ public class Employee extends BaseTimeEntity {
     this.status=EmployeeStatus.RESIGNED;
     this.resignationDate = LocalDate.now();
 
+  }
+  @PrePersist
+  public void generateEmployeeNumberBeforePersist() {
+    if (this.employeeNumber == null) {
+      // 팩트: 저장 직전에 사번이 비어있다면 여기서 생성해서 채워줌
+      this.employeeNumber = "EMP-" + System.currentTimeMillis();
+    }
   }
 }

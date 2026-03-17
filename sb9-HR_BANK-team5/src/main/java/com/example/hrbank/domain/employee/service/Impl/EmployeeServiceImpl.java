@@ -1,7 +1,9 @@
 package com.example.hrbank.domain.employee.service.Impl;
 
+import com.example.hrbank.domain.binarycontent.dto.data.BinaryContentDto;
 import com.example.hrbank.domain.binarycontent.dto.request.BinaryContentRequest;
 import com.example.hrbank.domain.binarycontent.entity.BinaryContent;
+import com.example.hrbank.domain.binarycontent.repository.BinaryContentRepository;
 import com.example.hrbank.domain.binarycontent.service.BinaryContentService;
 import com.example.hrbank.domain.employee.dto.data.ChangeLogDto;
 import com.example.hrbank.domain.employee.dto.data.CursorPageResponseEmployeeDto;
@@ -36,6 +38,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   private final EmployeeRepository repository;
   private final ChangeLogRepository changeLogRepository;
   private final BinaryContentService service;
+  private final BinaryContentRepository binaryContentRepository;
 
   @Transactional
   @Override
@@ -53,7 +56,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         // 3. 선우님의 서비스 규격에 맞춰 호출 (DTO 생성 및 Path 전달)
         // ※ 선우님 서비스가 엔티티를 반환한다고 가정
-        profileEntity = service.save(
+        BinaryContentDto savedDto = service.save(
             new BinaryContentRequest(
                 profile.getOriginalFilename(),
                 profile.getContentType(),
@@ -61,6 +64,8 @@ public class EmployeeServiceImpl implements EmployeeService {
             ),
             tempPath
         );
+        profileEntity = binaryContentRepository.findById(savedDto.id())
+            .orElseThrow(()->new NoSuchElementException("저장된 이미지가 없습니다"));
 
       } catch (IOException e) {
         throw new RuntimeException("파일 처리 중 오류가 발생했습니다.", e);
@@ -113,28 +118,32 @@ public class EmployeeServiceImpl implements EmployeeService {
     if (profile != null && !profile.isEmpty()) {
       Path tempPath = null;
       try {
-        // 1. 임시 파일 생성
         tempPath = Files.createTempFile("update_profile_", "_" + profile.getOriginalFilename());
         profile.transferTo(tempPath);
 
-        // 2. 선우님 서비스 규격(Request DTO + Path)에 맞춰 호출
-        BinaryContentRequest binaryRequest = new BinaryContentRequest(
-            profile.getOriginalFilename(),
-            profile.getContentType(),
-            profile.getSize()
+        // 1. 팩트: DTO로 결과 받기
+        BinaryContentDto savedDto = service.save(
+            new BinaryContentRequest(
+                profile.getOriginalFilename(),
+                profile.getContentType(),
+                profile.getSize()
+            ),
+            tempPath
         );
-        newProfileImage = service.save(binaryRequest, tempPath);
+
+        // 2. 팩트: ID로 엔티티 찾아와서 타입 맞추기
+        newProfileImage = binaryContentRepository.findById(savedDto.id())
+            .orElseThrow(() -> new NoSuchElementException("저장된 이미지를 찾을 수 없습니다."));
 
       } catch (IOException e) {
         throw new RuntimeException("프로필 이미지 업데이트 중 오류가 발생했습니다.", e);
       } finally {
-        // 3. 사용 완료 후 임시 파일 소각 (필수 팩트)
         if (tempPath != null) {
           try { Files.deleteIfExists(tempPath); } catch (IOException ignored) {}
         }
       }
     } else {
-      // 새 파일이 없으면 기존 이미지 유지
+      // 기존 이미지는 이미 엔티티 타입이므로 그대로 유지
       newProfileImage = employee.getProfileImage();
     }
 
