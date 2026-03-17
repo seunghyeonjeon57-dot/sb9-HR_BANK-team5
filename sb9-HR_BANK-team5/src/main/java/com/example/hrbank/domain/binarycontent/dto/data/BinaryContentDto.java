@@ -15,8 +15,7 @@ public record BinaryContentDto(
     String contentType,
     Long fileSize,
     @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    LocalDateTime createdAt,
-    byte[] fileData
+    LocalDateTime createdAt
 ) {
 
 }

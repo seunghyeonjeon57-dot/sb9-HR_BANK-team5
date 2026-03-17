@@ -31,15 +31,11 @@ public class BinaryContent extends BaseTimeEntity {
   @Column(name = "file_size", nullable = false)
   private Long fileSize;
 
-  @Lob
-  @Column(name = "file_data", nullable = false)
-  private byte[] fileData;
 
-  public BinaryContent(String fileName, String contentType, Long fileSize, byte[] fileData) {
+  public BinaryContent(String fileName, String contentType, Long fileSize) {
     this.fileName = fileName;
     this.contentType = contentType;
     this.fileSize = fileSize;
-    this.fileData = fileData;
   }
 
 }

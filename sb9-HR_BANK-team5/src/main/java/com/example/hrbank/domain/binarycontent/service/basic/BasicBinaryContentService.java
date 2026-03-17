@@ -31,8 +31,7 @@ public class BasicBinaryContentService implements BinaryContentService {
         file.getFileName(),
         file.getContentType(),
         file.getFileSize(),
-        file.getCreatedAt(),
-        file.getFileData()
+        file.getCreatedAt()
     );
 
     return storage.download(dto);
@@ -40,13 +39,12 @@ public class BasicBinaryContentService implements BinaryContentService {
 
   @Override
   @Transactional
-  public BinaryContentDto save(BinaryContentRequest request, Path filePath, byte[] fileData) {
+  public BinaryContentDto save(BinaryContentRequest request, Path filePath) {
 
     BinaryContent binaryContent = new BinaryContent(
         request.fileName(),
         request.contentType(),
-        request.fileSize(),
-        fileData
+        request.fileSize()
     );
     BinaryContent savedEntity = repository.save(binaryContent);
     storage.put(savedEntity.getId(),filePath);
@@ -56,8 +54,7 @@ public class BasicBinaryContentService implements BinaryContentService {
         savedEntity.getFileName(),
         savedEntity.getContentType(),
         savedEntity.getFileSize(),
-        savedEntity.getCreatedAt(),
-null
+        savedEntity.getCreatedAt()
     );
   }
 
@@ -71,8 +68,7 @@ null
         entity.getFileName(),
         entity.getContentType(),
         entity.getFileSize(),
-        entity.getCreatedAt(),
-        entity.getFileData()
+        entity.getCreatedAt()
     );
 
   }

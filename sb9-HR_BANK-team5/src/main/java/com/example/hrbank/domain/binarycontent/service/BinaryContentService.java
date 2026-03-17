@@ -12,7 +12,7 @@ public interface BinaryContentService {
 
   ResponseEntity<Resource> download(Long id);
 
-  BinaryContentDto save(BinaryContentRequest request, Path filePath, byte[] fileData);
+  BinaryContentDto save(BinaryContentRequest request, Path filePath);
 
   BinaryContentDto findById(Long id);
 
