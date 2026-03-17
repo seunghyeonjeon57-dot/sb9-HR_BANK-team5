@@ -1,5 +1,6 @@
 package com.example.hrbank.domain.employee.service.Impl;
 
+import com.example.hrbank.domain.binarycontent.dto.request.BinaryContentRequest;
 import com.example.hrbank.domain.binarycontent.entity.BinaryContent;
 import com.example.hrbank.domain.binarycontent.service.BinaryContentService;
 import com.example.hrbank.domain.employee.dto.data.ChangeLogDto;
@@ -17,13 +18,15 @@ import com.example.hrbank.domain.employee.repository.ChangeLogRepository;
 
 import com.example.hrbank.domain.employee.repository.EmployeeRepository;
 import com.example.hrbank.domain.employee.service.EmployeeService;
-import com.example.hrbank.global.util.IpUtil;
-import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +39,47 @@ public class EmployeeServiceImpl implements EmployeeService {
 
   @Transactional
   @Override
-  public EmployeeDto createEmployee(EmployeeCreateRequest request, BinaryContent profile) {
-    return null;
+  public EmployeeDto createEmployee(EmployeeCreateRequest request, MultipartFile profile) {
+    BinaryContent profileEntity = null;
+
+    if (profile != null && !profile.isEmpty()) {
+      Path tempPath = null;
+      try {
+        // 1. 팩트: 서버 디스크에 임시 파일 생성
+        tempPath = Files.createTempFile("profile_", "_" + profile.getOriginalFilename());
+
+        // 2. 팩트: 스트림 방식으로 내용 복사 (메모리 절약)
+        profile.transferTo(tempPath);
+
+        // 3. 선우님의 서비스 규격에 맞춰 호출 (DTO 생성 및 Path 전달)
+        // ※ 선우님 서비스가 엔티티를 반환한다고 가정
+        profileEntity = service.save(
+            new BinaryContentRequest(
+                profile.getOriginalFilename(),
+                profile.getContentType(),
+                profile.getSize()
+            ),
+            tempPath
+        );
+
+      } catch (IOException e) {
+        throw new RuntimeException("파일 처리 중 오류가 발생했습니다.", e);
+      } finally {
+        // 4. 팩트: 사용이 끝난 임시 파일은 반드시 삭제하여 디스크 누수 방지
+        if (tempPath != null) {
+          try { Files.deleteIfExists(tempPath); } catch (IOException ignored) {}
+        }
+      }
+    }
+    Employee  employee = Employee.builder()
+        .name(request.name())
+        .email(request.email())
+        .position(request.position())
+        .hireDate(request.hireDate())
+        .status(EmployeeStatus.ACTIVE)
+        .profileImage(profileEntity)
+        .build();
+    return mapper.toDto(repository.save(employee));
   }
 
   @Transactional(readOnly = true)
@@ -56,7 +98,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   }
   @Transactional
   @Override
-  public EmployeeDto updateEmployee(Long id, EmployeeUpdateRequest request,String ipAddress) {
+  public EmployeeDto updateEmployee(Long id, EmployeeUpdateRequest request, MultipartFile profile,String ipAddress) {
     Employee employee= repository.findById(id)
         .orElseThrow(()-> new NoSuchElementException("사원을 찾을 수 없습니다."));
     if(!employee.getEmail().equals(request.email())){
@@ -66,6 +108,34 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
     if(employee.getStatus()!= EmployeeStatus.RESIGNED && request.status().equals(EmployeeStatus.RESIGNED)){
       employee.resign();
+    }
+    BinaryContent newProfileImage = null;
+    if (profile != null && !profile.isEmpty()) {
+      Path tempPath = null;
+      try {
+        // 1. 임시 파일 생성
+        tempPath = Files.createTempFile("update_profile_", "_" + profile.getOriginalFilename());
+        profile.transferTo(tempPath);
+
+        // 2. 선우님 서비스 규격(Request DTO + Path)에 맞춰 호출
+        BinaryContentRequest binaryRequest = new BinaryContentRequest(
+            profile.getOriginalFilename(),
+            profile.getContentType(),
+            profile.getSize()
+        );
+        newProfileImage = service.save(binaryRequest, tempPath);
+
+      } catch (IOException e) {
+        throw new RuntimeException("프로필 이미지 업데이트 중 오류가 발생했습니다.", e);
+      } finally {
+        // 3. 사용 완료 후 임시 파일 소각 (필수 팩트)
+        if (tempPath != null) {
+          try { Files.deleteIfExists(tempPath); } catch (IOException ignored) {}
+        }
+      }
+    } else {
+      // 새 파일이 없으면 기존 이미지 유지
+      newProfileImage = employee.getProfileImage();
     }
 
 
@@ -85,7 +155,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     if (!employee.getPosition().equals(request.position())) {
       log.addDiff("position", employee.getPosition(), request.position());
     }
-    employee.updateEmployee(request.name(),request.email(),request.position(),request.hireDate(),request.status());
+    employee.updateEmployee(request.name(),request.email(),request.position(),request.hireDate(),request.status(),newProfileImage);
     changeLogRepository.save(log);
     return mapper.toDto(employee);
   }
