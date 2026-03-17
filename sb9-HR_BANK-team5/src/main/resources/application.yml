@@ -1,35 +1,14 @@
 spring:
-  # 1. H2 인메모리 DB 설정
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+  profiles:
+    active: local # [스위치] 기본값은 로컬로 설정! 배포할 때만 서버에서 이걸 prod로 바꿈
 
-  # 2. JPA/Hibernate 설정 (H2 전용 방언 사용)
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-
-  # 3. H2를 웹에서 볼 수 있게 해주는 콘솔
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-
-# 4. Swagger UI 설정 (민주님이 확인하고 싶은 것!)
+# Swagger 설정은 로컬이나 서버나 똑같이 확인해야 하니 공통에 둠
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
 
+# 백업 주기도 시스템 공통 정책이므로 여기에 위치
 backup:
   interval: "0 0 * * * *"
-
-"./data/storage": "./data/storage"
