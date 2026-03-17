@@ -24,8 +24,8 @@ public class EmployeeStatsServiceImpl implements EmployeeStatsService {
   @Transactional
   @Override
   public List<EmployeeTrendDto> getEmployeeTrend(LocalDate from, LocalDate to,String unit) {
-    long currentTotal= repository.countEmployeeBefore(from);
-    List<EmployeeEventCount> events= repository.getEventCounts(from,to);
+    long currentTotal= repository.totalEmployeeBefore(from);
+    List<EmployeeEventCount> events= repository.totalEventCounts(from,to);
 
     Map<LocalDate,EmployeeEventCount> eventMap = events.stream()
         .collect(Collectors.toMap(EmployeeEventCount::date,e->e));
@@ -49,8 +49,8 @@ public class EmployeeStatsServiceImpl implements EmployeeStatsService {
   @Override
   public List<EmployeeDistributionDto> getEmployeeDistribution(String groupBy,
       EmployeeStatus status) {
-    long totalCount = repository.getEmployeeCount(status,null,null);
-    List<EmployeeDistributionDto> distribution = repository.getEmployeeDistribution(groupBy,status);
+    long totalCount = repository.totalEmployeeCount(status,null,null);
+    List<EmployeeDistributionDto> distribution = repository.totalEmployeeDistribution(groupBy,status);
     if(totalCount ==0) return distribution;
 
     return distribution.stream()
@@ -69,7 +69,7 @@ public class EmployeeStatsServiceImpl implements EmployeeStatsService {
   @Override
   @Transactional(readOnly = true)
   public long getEmployeeCount(EmployeeStatus status, LocalDate fromDate, LocalDate toDate) {
-    return repository.getEmployeeCount(status,fromDate,toDate);
+    return repository.totalEmployeeCount(status,fromDate,toDate);
   }
   private LocalDate getNextDate(LocalDate date, String unit) {
     return switch (unit.toLowerCase()) {

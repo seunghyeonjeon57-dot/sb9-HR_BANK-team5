@@ -1,11 +1,9 @@
-package com.example.hrbank.domain.employee.repository.Impl;
+package com.example.hrbank.domain.employee.repository;
 
-import com.example.hrbank.domain.employee.dto.data.ChangeLogDto;
 import com.example.hrbank.domain.employee.dto.request.ChangeLogSearchRequest;
 import com.example.hrbank.domain.employee.entity.ChangeLog;
 import com.example.hrbank.domain.employee.entity.QChangeLog;
 import com.example.hrbank.domain.employee.entity.enums.ChannelType;
-import com.example.hrbank.domain.employee.repository.custom.ChangeLogRepositoryCustom;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -21,7 +19,7 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
   private final QChangeLog changeLog = QChangeLog.changeLog;
 
   @Override
-  public List<ChangeLog> searchLogs(ChangeLogSearchRequest request) {
+  public List<ChangeLog> totalLogs(ChangeLogSearchRequest request) {
     return queryFactory
         .selectFrom(changeLog)
         .where(
@@ -39,7 +37,7 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
   }
 
   @Override
-  public Long countSearchLogs(ChangeLogSearchRequest request) {
+  public Long totalSearchLogs(ChangeLogSearchRequest request) {
     return queryFactory.select(changeLog.count())
         .from(changeLog)
         .where(
@@ -83,7 +81,7 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
 
 
   @Override
-  public Long countChangeLogs(LocalDateTime fromDate, LocalDateTime toDate) {
+  public Long totalChangeLogs(LocalDateTime fromDate, LocalDateTime toDate) {
     LocalDateTime start = (fromDate != null) ? fromDate : LocalDateTime.now().minusDays(7);
     LocalDateTime end = (toDate != null) ? toDate : LocalDateTime.now();
 

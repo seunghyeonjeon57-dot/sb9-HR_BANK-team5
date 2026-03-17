@@ -50,8 +50,8 @@ public class ChangeLogServiceImpl implements ChangeLogService {
   @Override
   @Transactional(readOnly = true)
   public CursorPageResponseChangeLogDto getChangeLog(ChangeLogSearchRequest request) {
-    List<ChangeLog> entities = repository.searchLogs(request);
-    Long totalElements = repository.countSearchLogs(request);
+    List<ChangeLog> entities = repository.totalLogs(request);
+    Long totalElements = repository.totalSearchLogs(request);
 
     boolean hasNext = entities.size()>request.size();
     List<ChangeLog> subEntities = hasNext ? entities.subList(0,request.size()) : entities;
@@ -82,6 +82,6 @@ public class ChangeLogServiceImpl implements ChangeLogService {
   public long countChangelogs(LocalDateTime fromDate, LocalDateTime toDate) {
     LocalDateTime start = (fromDate != null) ? fromDate : LocalDateTime.now().minusDays(7);
     LocalDateTime end = (toDate != null) ?  toDate : LocalDateTime.now();
-    return repository.countChangeLogs(start,end);
+    return repository.totalChangeLogs(start,end);
   }
 }

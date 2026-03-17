@@ -1,12 +1,9 @@
-package com.example.hrbank.domain.employee.repository.Impl;
+package com.example.hrbank.domain.employee.repository;
 
 import com.example.hrbank.domain.employee.dto.data.EmployeeDistributionDto;
 import com.example.hrbank.domain.employee.dto.data.EmployeeEventCount;
-import com.example.hrbank.domain.employee.dto.data.EmployeeTrendDto;
-import com.example.hrbank.domain.employee.entity.Employee;
 import com.example.hrbank.domain.employee.entity.QEmployee;
 import com.example.hrbank.domain.employee.entity.enums.EmployeeStatus;
-import com.example.hrbank.domain.employee.repository.custom.EmployeeStatsRepositoryCustom;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -18,16 +15,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class EmployeeRepositoryStatsImpl implements EmployeeStatsRepositoryCustom {
+public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCustom {
   private final JPAQueryFactory factory;
-  private final QEmployee employee;
+  private final QEmployee employee=QEmployee.employee;
 
   @Override
-  public List<EmployeeEventCount> getEventCounts(LocalDate from, LocalDate to) {
+  public List<EmployeeEventCount> totalEventCounts(LocalDate from, LocalDate to) {
     Map<LocalDate,Long> joinMap = factory.select(employee.hireDate,employee.count())
         .from(employee)
         .where(employee.hireDate.between(from,to))
@@ -49,7 +45,7 @@ public class EmployeeRepositoryStatsImpl implements EmployeeStatsRepositoryCusto
   }
 
   @Override
-  public List<EmployeeDistributionDto> getEmployeeDistribution(String groupBy,
+  public List<EmployeeDistributionDto> totalEmployeeDistribution(String groupBy,
       EmployeeStatus status) {
     StringPath groupPath = Expressions.stringPath(employee,groupBy);
     return factory.select(Projections.constructor(EmployeeDistributionDto.class,
@@ -63,7 +59,7 @@ public class EmployeeRepositoryStatsImpl implements EmployeeStatsRepositoryCusto
   }
 
   @Override
-  public long getEmployeeCount(EmployeeStatus status, LocalDate fromDate, LocalDate toDate) {
+  public long totalEmployeeCount(EmployeeStatus status, LocalDate fromDate, LocalDate toDate) {
     Long count = factory.select(employee.count())
         .from(employee)
         .where(statusEq(status),
@@ -74,7 +70,7 @@ public class EmployeeRepositoryStatsImpl implements EmployeeStatsRepositoryCusto
   }
 
   @Override
-  public long countEmployeeBefore(LocalDate date) {
+  public long totalEmployeeBefore(LocalDate date) {
     Long count=factory
         .select(employee.count())
         .from(employee)
