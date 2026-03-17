@@ -9,12 +9,16 @@ import com.example.hrbank.domain.department.entity.Department;
 import com.example.hrbank.domain.department.mapper.DepartmentMapper;
 import com.example.hrbank.domain.department.repository.DepartmentRepository;
 import com.example.hrbank.domain.department.service.DepartmentService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +37,7 @@ public class BasicDepartmentService implements DepartmentService {
     LocalDate establishedDate = departmentCreateRequest.establishedDate();
 
     if(departmentRepository.existsByName(name))
-      throw new IllegalArgumentException("Departmentname with email " + name + " already exists");
+      throw new IllegalArgumentException("Departmentname with name " + name + " already exists");
 
     Department department = new Department(name, description, establishedDate, employeeCount);
     departmentRepository.save(department);
@@ -66,16 +70,50 @@ public class BasicDepartmentService implements DepartmentService {
 
 //  한 페이지에 보여줄 개수
     int size = request.size() != null ? request.size() : 10;
-//  idAfter는 마지막으로 본 데이터(id). 값이 없으면 0부터 시작
-    Long idAfter = request.idAfter() != null ? request.idAfter() : 0L;
+//  cursor 기반 idAfter
+    Long idAfter = 0L;
+    if (request.cursor() != null && !request.cursor().isBlank()) {
+      try {
+        byte[] decodedBytes = Base64.getDecoder().decode(request.cursor());
+        String json = new String(decodedBytes);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> map = objectMapper.readValue(json, Map.class);
+        idAfter = ((Number) map.get("id")).longValue();
+      } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        // cursor 파싱 실패 시 기본값 0 사용
+        idAfter = 0L;
+      }
+    } else if (request.idAfter() != null) {
+      idAfter = request.idAfter();
+    }
+    // 정렬 필드 기본값
+    String sortField = request.sortField() != null ? request.sortField() : "establishedDate";
+
+    //허용된 정렬 필드 검증
+    if (!List.of("name", "establishedDate").contains(sortField)) {
+      sortField = "establishedDate";
+    }
+
+// 정렬 방향 기본값
+    String sortDirection = request.sortDirection() != null ? request.sortDirection() : "asc";
+
+// Sort 객체 생성
+    Sort sort = Sort.by(
+        Sort.Direction.fromString(sortDirection),
+        sortField
+    );
+
 //    한 페이지에 3개를 보여줄려고 size = 3을 하고, db에서는 +1을 한 4를 조회한다.
 //    그럼 3개 이상이 있다는 뜻이니까 3개만 조회했을 경우 다음 페이지가 있다는 것을 알 수 있다.
-    Pageable pageable = PageRequest.of(0, size + 1);
+    Pageable pageable = PageRequest.of(0, size + 1, sort);
 
 //    idAfter = 5 , size = 3 이면, 조회 결과(departments) : 6,7,8,9
     List<Department> departments =
-        departmentRepository.findByIdGreaterThanOrderByIdAsc(idAfter, pageable);
-
+        departmentRepository.searchDepartments(
+            request.nameOrDescription(),
+            idAfter,
+            pageable
+        );
 //    다음 페이지 존재 여부 판단. size = 3, 조회 = 4 이면 다음 페이지가 있음
     boolean hasNext = departments.size() > size;
 
