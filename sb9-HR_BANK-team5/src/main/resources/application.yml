@@ -1,5 +1,5 @@
 spring:
-  # 1. H2 인메모리 DB 설정 (로그인 과정이 필요 없어 에러가 안 납니다!)
+  # 1. H2 인메모리 DB 설정
   datasource:
     url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
@@ -28,3 +28,8 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+backup:
+  interval: "0 0 * * * *"
+
+"./data/storage": "./data/storage"

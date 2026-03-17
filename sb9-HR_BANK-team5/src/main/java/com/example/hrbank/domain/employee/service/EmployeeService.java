@@ -6,14 +6,15 @@ import com.example.hrbank.domain.employee.dto.data.EmployeeDto;
 import com.example.hrbank.domain.employee.dto.request.EmployeeCreateRequest;
 import com.example.hrbank.domain.employee.dto.request.EmployeeSearchRequest;
 import com.example.hrbank.domain.employee.dto.request.EmployeeUpdateRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface EmployeeService {
-  EmployeeDto create(EmployeeCreateRequest request, BinaryContent profile);
-  CursorPageResponseEmployeeDto getEmployeePage(EmployeeSearchRequest request);
-  EmployeeDto findEmployeeById(EmployeeDto dto);
-  EmployeeDto updateEmployee(Long id,EmployeeUpdateRequest updateRequest);
-  void deleteEmployee(Long id);
+  EmployeeDto createEmployee(EmployeeCreateRequest request, BinaryContent profile);
+  CursorPageResponseEmployeeDto searchEmployees(EmployeeSearchRequest request);
+  EmployeeDto searchEmployeeById(Long id);
+  EmployeeDto updateEmployee(Long id,EmployeeUpdateRequest updateRequest,String ipAddress);
+  void deleteEmployee(Long id, String ipAddress);
 
 
 }
