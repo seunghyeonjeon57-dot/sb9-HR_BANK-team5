@@ -46,6 +46,7 @@ public interface EmployeeControllerApi {
 
   })
   public ResponseEntity<EmployeeDto> createEmployee(
+      @Parameter(description = "직원 생성 정보(JSON",content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
        @RequestPart("employee") EmployeeCreateRequest employeeCreateRequest,
        @RequestPart(value="profile",required = false) MultipartFile profile
   );
