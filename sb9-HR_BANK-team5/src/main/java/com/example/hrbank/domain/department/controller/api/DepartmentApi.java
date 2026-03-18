@@ -38,7 +38,7 @@ public interface DepartmentApi {
           content = @Content(examples = @ExampleObject(value = "Invalid search parameters"))),
       @ApiResponse(responseCode = "500", description = "서버 오류")
   })
-  ResponseEntity<?> findAll(@RequestBody(required = false) DepartmentSearchRequest request);
+  ResponseEntity<?> findAll(DepartmentSearchRequest request);
 
   @Operation(summary = "부서 상세 조회", operationId = "getDepartment")
   @ApiResponses(value = {
