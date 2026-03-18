@@ -76,11 +76,12 @@ public class BasicBinaryContentService implements BinaryContentService {
   @Override
   @Transactional
   public void delete(Long id) {
-    BinaryContent content = repository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("없는 파일 입니다"));
 
+    //스토리지 먼저 삭제
     storage.delete(id);
-    repository.delete(content);
+    // DB 삭제
+    repository.findById(id)
+        .ifPresent(repository::delete);
   }
 
   public BinaryContent getEntity(Long id) {
