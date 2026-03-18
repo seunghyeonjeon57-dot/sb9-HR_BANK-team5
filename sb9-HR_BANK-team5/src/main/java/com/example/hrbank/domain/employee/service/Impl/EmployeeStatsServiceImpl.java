@@ -20,28 +20,55 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Service
 @RequiredArgsConstructor
 public class EmployeeStatsServiceImpl implements EmployeeStatsService {
-      private final EmployeeStatsRepository repository;
+  private final EmployeeStatsRepository repository;
   @Transactional
   @Override
   public List<EmployeeTrendDto> getEmployeeTrend(LocalDate from, LocalDate to,String unit) {
-    long currentTotal= repository.totalEmployeeBefore(from);
-    List<EmployeeEventCount> events= repository.totalEventCounts(from,to);
+    String finalUnit = (unit != null && !unit.isEmpty()) ? unit.toLowerCase() : "month";
+    LocalDate finalTo = (to != null) ? to : LocalDate.now();
+    LocalDate finalFrom = from;
+    if (finalFrom == null) {
+      finalFrom = switch (finalUnit) {
+        case "day" -> finalTo.minusDays(6);        // 일별: 최근 일주일 (오늘 포함 7일)
+        case "week" -> finalTo.minusWeeks(6);      // 주별: 최근 7주 (이번 주 포함 7개)
+        case "month" -> finalTo.minusMonths(11);   // 월별: 최근 12개월 (이번 달 포함 12개)
+        case "quarter" -> finalTo.minusMonths(18); // 분기별: 최근 7분기 (이번 분기 포함 7개, 1분기=3달이므로 6*3=18개월 전)
+        case "year" -> finalTo.minusYears(11);     // 연도별: 최근 12년 (올해 포함 12개)
+        default -> finalTo.minusMonths(11);        // 오타 방어용 (기본 월별)
+      };
+    }
+    long currentTotal = repository.totalEmployeeBefore(finalFrom);
+    List<EmployeeEventCount> events = repository.totalEventCounts(finalFrom, finalTo);
 
-    Map<LocalDate,EmployeeEventCount> eventMap = events.stream()
-        .collect(Collectors.toMap(EmployeeEventCount::date,e->e));
+    Map<LocalDate, EmployeeEventCount> eventMap = events.stream()
+        .collect(Collectors.toMap(EmployeeEventCount::date, e -> e));
     List<EmployeeTrendDto> result = new ArrayList<>();
-    for(LocalDate date = from; !date.isAfter(to); date=getNextDate(date,unit)){
-      EmployeeEventCount event = eventMap.getOrDefault(date,new EmployeeEventCount(date,0L,0L));
-      long change = event.joinCount()- event.quitCount();
+
+    // 반복문 수정: "딱 그날"이 아니라 "다음 구간 전까지"의 모든 이벤트를 긁어모읍니다.
+    for (LocalDate date = finalFrom; !date.isAfter(finalTo); ) {
+      LocalDate nextDate = getNextDate(date, finalUnit);
+
+      // 해당 구간(date ~ nextDate 직전) 사이의 모든 입사/퇴사 합산
+      LocalDate currentLoopDate = date;
+      long joinCount = events.stream()
+          .filter(e -> !e.date().isBefore(currentLoopDate) && e.date().isBefore(nextDate))
+          .mapToLong(EmployeeEventCount::joinCount).sum();
+      long quitCount = events.stream()
+          .filter(e -> !e.date().isBefore(currentLoopDate) && e.date().isBefore(nextDate))
+          .mapToLong(EmployeeEventCount::quitCount).sum();
+
+      long change = joinCount - quitCount;
       long previousTotal = currentTotal;
       currentTotal += change;
-      double rate = (previousTotal ==0) ? 0.0 : (double) change/previousTotal * 100;
+      double rate = (previousTotal == 0) ? 0.0 : (double) change / previousTotal * 100;
+
       result.add(new EmployeeTrendDto(
           date,
           currentTotal,
           change,
-          Math.round(rate *10.0)/10.0
+          Math.round(rate * 10.0) / 10.0
       ));
+      date = nextDate;
     }
     return result;
   }

@@ -1,27 +1,29 @@
 package com.example.hrbank.domain.employee.repository;
 
 import static com.example.hrbank.domain.department.entity.QDepartment.department;
-
 import com.example.hrbank.domain.employee.dto.request.EmployeeSearchRequest;
 import com.example.hrbank.domain.employee.entity.Employee;
 import com.example.hrbank.domain.employee.entity.QEmployee;
 import com.example.hrbank.domain.employee.entity.enums.EmployeeStatus;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.util.StringUtils;
 
-
 @RequiredArgsConstructor
 public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
   private final JPAQueryFactory factory;
-  private final QEmployee employee=QEmployee.employee;
+  private final QEmployee employee = QEmployee.employee;
 
   @Override
-  public List<Employee> totalEmployee(EmployeeSearchRequest request) {
+  public List<Employee> totalEmployee(EmployeeSearchRequest request, String lastValue, Long lastId) {
+    String sortField = request.sortField() != null ? request.sortField() : "id";
+    String direction = request.sortDirection() != null ? request.sortDirection() : "asc";
+
     return factory.selectFrom(employee)
         .leftJoin(employee.department, department).fetchJoin()
         .where(
@@ -30,11 +32,12 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
             containsPosition(request.position()),
             containsEmployeeNumber(request.employeeNumber()),
             eqEmployeeStatus(request.status()),
-            betweenHireDate(request.hireDateFrom(),request.hireDateTo()),
-            pagingCondition(request.idAfter(),request.sortDirection())
+            betweenHireDate(request.hireDateFrom(), request.hireDateTo()),
+            // 핵심: 복합 커서 조건문 적용
+            compositeCursorCondition(lastValue, lastId, sortField, direction)
         )
-        .orderBy(getSortOrder(request.sortField(),request.sortDirection()))
-        .limit(request.size()+1)
+        .orderBy(getSortOrder(sortField, direction))
+        .limit(request.size() + 1)
         .fetch();
   }
 
@@ -42,60 +45,72 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
   public Long totalCountEmployee(EmployeeSearchRequest request) {
     return factory.select(employee.count())
         .from(employee)
-        .leftJoin(employee.department,department)
-        .where(containsNameOrEmail(request.nameOrEmail()),
+        .leftJoin(employee.department, department)
+        .where(
+            containsNameOrEmail(request.nameOrEmail()),
             containsDepartmentName(request.departmentName()),
             containsPosition(request.position()),
             containsEmployeeNumber(request.employeeNumber()),
             eqEmployeeStatus(request.status()),
-            betweenHireDate(request.hireDateFrom(), request.hireDateTo()))
+            betweenHireDate(request.hireDateFrom(), request.hireDateTo())
+        )
         .fetchOne();
   }
 
+  // 복합 커서 로직: (기준값 > 마지막값) OR (기준값 == 마지막값 AND ID > 마지막ID)
+  private BooleanExpression compositeCursorCondition(String lastValue, Long lastId, String sortField, String direction) {
+    if (lastValue == null || lastId == null) return null;
 
+    boolean isAsc = "asc".equalsIgnoreCase(direction);
 
+    // 정렬 대상 필드를 문자열로 통일하여 비교
+    StringExpression targetField = switch (sortField) {
+      case "name" -> employee.name;
+      case "employeeNumber" -> employee.employeeNumber;
+      case "hireDate" -> employee.hireDate.stringValue();
+      default -> employee.id.stringValue();
+    };
 
-  private BooleanExpression containsNameOrEmail(String keyword){
-    if(!StringUtils.hasText(keyword)) return null;
-    return employee.name.contains(keyword).or(employee.email.contains(keyword
-    ));
+    if (isAsc) {
+      return targetField.gt(lastValue)
+          .or(targetField.eq(lastValue).and(employee.id.gt(lastId)));
+    } else {
+      return targetField.lt(lastValue)
+          .or(targetField.eq(lastValue).and(employee.id.gt(lastId))); // 타이브레이커 ID는 항상 gt
+    }
   }
-  private BooleanExpression containsDepartmentName(String keyword){
-    if(!StringUtils.hasText(keyword))return null;
+
+  private BooleanExpression containsNameOrEmail(String keyword) {
+    if (!StringUtils.hasText(keyword)) return null;
+    return employee.name.contains(keyword).or(employee.email.contains(keyword));
+  }
+
+  private BooleanExpression containsDepartmentName(String keyword) {
+    if (!StringUtils.hasText(keyword)) return null;
     return employee.department.name.contains(keyword);
   }
-  private BooleanExpression containsPosition(String keyword){
-    if(!StringUtils.hasText(keyword)) return null;
+
+  private BooleanExpression containsPosition(String keyword) {
+    if (!StringUtils.hasText(keyword)) return null;
     return employee.position.contains(keyword);
   }
-  private BooleanExpression containsEmployeeNumber(String keyword){
-    if(!StringUtils.hasText(keyword))return null;
+
+  private BooleanExpression containsEmployeeNumber(String keyword) {
+    if (!StringUtils.hasText(keyword)) return null;
     return employee.employeeNumber.contains(keyword);
   }
-  private BooleanExpression eqEmployeeStatus(EmployeeStatus status){
-    if(status==null) return null;
-    return employee.status.eq(status);
+
+  private BooleanExpression eqEmployeeStatus(EmployeeStatus status) {
+    return status != null ? employee.status.eq(status) : null;
   }
-  private BooleanExpression betweenHireDate(LocalDate from,LocalDate to){
-    if(from!=null && to!=null){
-      return employee.hireDate.between(from,to);
-    }
-    if(from != null){
-      return employee.hireDate.goe(from);
-    }
-    if(to!=null){
-      return employee.hireDate.loe(to);
-    }
+
+  private BooleanExpression betweenHireDate(LocalDate from, LocalDate to) {
+    if (from != null && to != null) return employee.hireDate.between(from, to);
+    if (from != null) return employee.hireDate.goe(from);
+    if (to != null) return employee.hireDate.loe(to);
     return null;
   }
-  private BooleanExpression ltEmployeeId(Long lastId){
-    if(lastId==null) return null;
-    return employee.id.lt(lastId);
-  }
-  private BooleanExpression pagingCondition(Long lastId, String direction) {
-    if (lastId == null) return null;
-    return "DESC".equalsIgnoreCase(direction) ? employee.id.lt(lastId) : employee.id.gt(lastId);
-  }
+
   private OrderSpecifier<?>[] getSortOrder(String field, String direction) {
     com.querydsl.core.types.Order order = "DESC".equalsIgnoreCase(direction) ?
         com.querydsl.core.types.Order.DESC : com.querydsl.core.types.Order.ASC;
@@ -107,8 +122,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
       default -> new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, employee.id);
     };
 
-    // 팩트: 중복 값 대비 보조 정렬(id)을 추가해야 페이징이 안 꼬입니다.
-    return new OrderSpecifier[]{mainOrder, new OrderSpecifier<>(order, employee.id)};
+    // 보조 정렬(ID)을 반드시 추가해야 페이징이 안정적입니다.
+    return new OrderSpecifier[]{mainOrder, new OrderSpecifier<>(com.querydsl.core.types.Order.ASC, employee.id)};
   }
-
 }

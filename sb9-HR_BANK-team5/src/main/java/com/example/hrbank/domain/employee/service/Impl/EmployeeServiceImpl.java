@@ -18,14 +18,15 @@ import com.example.hrbank.domain.employee.entity.enums.ChangeLogType;
 import com.example.hrbank.domain.employee.entity.enums.EmployeeStatus;
 import com.example.hrbank.domain.employee.mapper.EmployeeMapper;
 import com.example.hrbank.domain.employee.repository.ChangeLogRepository;
-
 import com.example.hrbank.domain.employee.repository.EmployeeRepository;
 import com.example.hrbank.domain.employee.service.EmployeeService;
+import com.example.hrbank.global.error.BusinessException;
+import com.example.hrbank.global.error.ErrorCode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,18 +41,20 @@ public class EmployeeServiceImpl implements EmployeeService {
   private final EmployeeMapper mapper;
   private final EmployeeRepository repository;
   private final ChangeLogRepository changeLogRepository;
-  private final BinaryContentService service;
+  private final BinaryContentService binaryContentService;
   private final BinaryContentRepository binaryContentRepository;
   private final DepartmentRepository departmentRepository;
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Transactional
   @Override
   public EmployeeDto createEmployee(EmployeeCreateRequest request, MultipartFile profile) {
     BinaryContent profileEntity = uploadProfileImage(profile);
     Department department = departmentRepository.findById(request.departmentId())
-        .orElseThrow(()-> new NoSuchElementException("부서가 없습니다"));
+        .orElseThrow(() -> new NoSuchElementException("부서가 없습니다."));
+      department.addEmployee();
 
-    Employee  employee = Employee.builder()
+    Employee employee = Employee.builder()
         .name(request.name())
         .email(request.email())
         .position(request.position())
@@ -61,134 +64,139 @@ public class EmployeeServiceImpl implements EmployeeService {
         .profileImage(profileEntity)
         .build();
 
+
     Employee savedEmployee = repository.save(employee);
-    log.info("신규 사원 생성 완료:{}",savedEmployee);
-    return mapper.toDto(repository.save(employee));
+
+
+    ChangeLog initLog = ChangeLog.builder()
+        .type(ChangeLogType.CREATED)
+        .employeeNumber(savedEmployee.getEmployeeNumber())
+        .memo("신규 사원 등록: " + savedEmployee.getName() + " (" + department.getName() + ")")
+        .ipAddress("SYSTEM")
+        .build();
+    changeLogRepository.save(initLog);
+
+    log.info("신규 사원 생성 및 로그 기록 완료: {}", savedEmployee.getEmployeeNumber());
+    return mapper.toDto(savedEmployee);
   }
 
   @Transactional(readOnly = true)
   @Override
   public CursorPageResponseEmployeeDto searchEmployees(EmployeeSearchRequest request) {
-    List<Employee> employees = repository.totalEmployee(request);
+    String lastValue = null;
+    Long lastId = 0L;
+
+    // 복합 커서 디코딩 (JSON 기반)
+    if (request.cursor() != null && !request.cursor().isBlank()) {
+      try {
+        byte[] decodedBytes = Base64.getDecoder().decode(request.cursor());
+        Map<String, Object> map = objectMapper.readValue(new String(decodedBytes), Map.class);
+        lastValue = map.get("v").toString();
+        lastId = ((Number) map.get("id")).longValue();
+      } catch (Exception e) {
+        throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+      }
+    }
+
+    List<Employee> employees = repository.totalEmployee(request, lastValue, lastId);
     long totalElements = repository.totalCountEmployee(request);
-    boolean hasNext = employees.size()>request.size();
-    List<Employee> resultEmployees = hasNext ? employees.subList(0, request.size()):employees;
+
+    boolean hasNext = employees.size() > request.size();
+    List<Employee> resultEmployees = hasNext ? employees.subList(0, request.size()) : employees;
+
     return mapper.toCursorPageResponse(
         resultEmployees,
         totalElements,
         request.size(),
-        hasNext
+        hasNext,
+        request.sortField()
     );
   }
+
   @Transactional
   @Override
-  public EmployeeDto updateEmployee(Long id, EmployeeUpdateRequest request, MultipartFile profile,String ipAddress) {
-    Employee employee= repository.findById(id)
-        .orElseThrow(()-> new NoSuchElementException("사원을 찾을 수 없습니다."));
-    if(!employee.getEmail().equals(request.email())){
-      if(repository.existsByEmail(request.email())){
-        throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
-      }
-    }
-    if(employee.getStatus()!= EmployeeStatus.RESIGNED && request.status().equals(EmployeeStatus.RESIGNED)){
-      employee.resign();
-    }
-    BinaryContent newProfileImage =uploadProfileImage(profile);
-    if(newProfileImage == null){
-      newProfileImage=employee.getProfileImage();
+  public EmployeeDto updateEmployee(Long id, EmployeeUpdateRequest request, MultipartFile profile, String ipAddress) {
+    Employee employee = repository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("사원을 찾을 수 없습니다."));
+
+    if (!employee.getEmail().equals(request.email()) && repository.existsByEmail(request.email())) {
+      throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
     }
 
+    BinaryContent newProfileImage = uploadProfileImage(profile);
+    if (newProfileImage == null) newProfileImage = employee.getProfileImage();
 
-    ChangeLog log = ChangeLog.builder()
+    // 로그 기록 준비
+    ChangeLog logEntity = ChangeLog.builder()
         .type(ChangeLogType.UPDATED)
         .employeeNumber(employee.getEmployeeNumber())
         .memo(request.memo())
         .ipAddress(ipAddress)
         .build();
 
-    if (!employee.getName().equals(request.name())) {
-      log.addDiff("name", employee.getName(), request.name());
-    }
-    if (!employee.getEmail().equals(request.email())) {
-      log.addDiff("email", employee.getEmail(), request.email());
-    }
-    if (!employee.getPosition().equals(request.position())) {
-      log.addDiff("position", employee.getPosition(), request.position());
+    // 변경 내역 비교 (Diff)
+    if (!employee.getName().equals(request.name())) logEntity.addDiff("name", employee.getName(), request.name());
+    if (!employee.getEmail().equals(request.email())) logEntity.addDiff("email", employee.getEmail(), request.email());
+
+    if (request.departmentId() != null && (employee.getDepartment() == null || !employee.getDepartment().getId().equals(request.departmentId()))) {
+      Department newDept = departmentRepository.findById(request.departmentId())
+          .orElseThrow(() -> new NoSuchElementException("이동할 부서가 없습니다."));
+      String oldDeptName = employee.getDepartment() != null ? employee.getDepartment().getName() : "미지정";
+      logEntity.addDiff("department", oldDeptName, newDept.getName());
+      employee.changeDepartment(newDept);
     }
 
-    String beforeDeptName = (employee.getDepartment() != null)
-        ? employee.getDepartment().getName()
-        : "미지정";
-    if(request.departmentId()!=null) {
-      boolean isChanged = (employee.getDepartment() ==null) || (!employee.getDepartment().getId().equals(request.departmentId()));
-      if(isChanged){
-        Department newDept  = departmentRepository.findById(request.departmentId())
-            .orElseThrow(()->new NoSuchElementException("이동할 부서가 존재하지 않습니다."));
-        log.addDiff("department",beforeDeptName,newDept.getName());
-        employee.changeDepartment(newDept);
+    employee.updateEmployee(request.name(), request.email(), request.position(), request.hireDate(), request.status(), newProfileImage);
+    changeLogRepository.save(logEntity);
 
-      }
-
-
-    }
-    employee.updateEmployee(request.name(),request.email(),request.position(),request.hireDate(),request.status(),newProfileImage);
-    changeLogRepository.save(log);
     return mapper.toDto(employee);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public EmployeeDto searchEmployeeById(Long id)
-  {
+  public EmployeeDto searchEmployeeById(Long id) {
     return repository.findById(id).map(mapper::toDto)
-        .orElseThrow(()->new NoSuchElementException("해당 Id를 가진 사원이 없습니다."));
+        .orElseThrow(() -> new NoSuchElementException("해당 사원이 없습니다."));
   }
 
   @Override
   @Transactional
   public void deleteEmployee(Long id, String ipAddress) {
     Employee employee = repository.findById(id)
-        .orElseThrow(()->new NoSuchElementException("사원이 없습니다."));
+        .orElseThrow(() -> new NoSuchElementException("사원이 없습니다."));
 
+    if(employee.getDepartment() != null){
+      employee.getDepartment().removeEmployee();
+    }
 
-
-    ChangeLog log = ChangeLog.builder()
+    ChangeLog logEntity = ChangeLog.builder()
         .type(ChangeLogType.DELETED)
         .employeeNumber(employee.getEmployeeNumber())
-        .memo("직원을 삭제합니다")
+        .memo("직원 삭제")
         .ipAddress(ipAddress)
         .build();
-    changeLogRepository.save(log);
-    if(employee.getProfileImage()!=null){
-      service.delete(employee.getProfileImage().getId());
+    changeLogRepository.save(logEntity);
+
+    if (employee.getProfileImage() != null) {
+      binaryContentService.delete(employee.getProfileImage().getId());
     }
     repository.delete(employee);
   }
 
-
   private BinaryContent uploadProfileImage(MultipartFile profile) {
     if (profile == null || profile.isEmpty()) return null;
-
     Path tempPath = null;
     try {
       tempPath = Files.createTempFile("profile_", "_" + profile.getOriginalFilename());
       profile.transferTo(tempPath);
-
-      BinaryContentDto savedDto = service.save(
-          new BinaryContentRequest(profile.getOriginalFilename(), profile.getContentType(), profile.getSize()),
-          tempPath
-      );
-
+      BinaryContentDto savedDto = binaryContentService.save(
+          new BinaryContentRequest(profile.getOriginalFilename(), profile.getContentType(), profile.getSize()), tempPath);
       return binaryContentRepository.findById(savedDto.id())
-          .orElseThrow(() -> new NoSuchElementException("저장된 이미지가 없습니다."));
+          .orElseThrow(() -> new NoSuchElementException("이미지 저장 실패"));
     } catch (IOException e) {
-      throw new RuntimeException("프로필 이미지 처리 중 오류 발생", e);
+      throw new RuntimeException("프로필 처리 오류", e);
     } finally {
-      if (tempPath != null) {
-        try { Files.deleteIfExists(tempPath); } catch (IOException ignored) {}
-      }
+      if (tempPath != null) try { Files.deleteIfExists(tempPath); } catch (IOException ignored) {}
     }
   }
-
 }
-
