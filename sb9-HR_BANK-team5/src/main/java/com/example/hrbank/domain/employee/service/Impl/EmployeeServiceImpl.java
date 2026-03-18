@@ -48,7 +48,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
   @Transactional
   @Override
-  public EmployeeDto createEmployee(EmployeeCreateRequest request, MultipartFile profile) {
+  public EmployeeDto createEmployee(EmployeeCreateRequest request, MultipartFile profile,String ipAddress) {
     BinaryContent profileEntity = uploadProfileImage(profile);
     Department department = departmentRepository.findById(request.departmentId())
         .orElseThrow(() -> new NoSuchElementException("부서가 없습니다."));
@@ -72,7 +72,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         .type(ChangeLogType.CREATED)
         .employeeNumber(savedEmployee.getEmployeeNumber())
         .memo("신규 사원 등록: " + savedEmployee.getName() + " (" + department.getName() + ")")
-        .ipAddress("SYSTEM")
+        .ipAddress(ipAddress)
         .build();
     changeLogRepository.save(initLog);
 
@@ -120,7 +120,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         .orElseThrow(() -> new NoSuchElementException("사원을 찾을 수 없습니다."));
 
     if (!employee.getEmail().equals(request.email()) && repository.existsByEmail(request.email())) {
-      throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+      throw new BusinessException(ErrorCode.EMAIL_DUPLICATION);
     }
 
     BinaryContent newProfileImage = uploadProfileImage(profile);
@@ -141,6 +141,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     if (request.departmentId() != null && (employee.getDepartment() == null || !employee.getDepartment().getId().equals(request.departmentId()))) {
       Department newDept = departmentRepository.findById(request.departmentId())
           .orElseThrow(() -> new NoSuchElementException("이동할 부서가 없습니다."));
+      if(employee.getDepartment()!=null){
+        employee.getDepartment().removeEmployee();
+      }
+      newDept.addEmployee();
       String oldDeptName = employee.getDepartment() != null ? employee.getDepartment().getName() : "미지정";
       logEntity.addDiff("department", oldDeptName, newDept.getName());
       employee.changeDepartment(newDept);
@@ -162,25 +166,33 @@ public class EmployeeServiceImpl implements EmployeeService {
   @Override
   @Transactional
   public void deleteEmployee(Long id, String ipAddress) {
+    // 1. 직원 정보 가져오기
     Employee employee = repository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("사원이 없습니다."));
 
-    if(employee.getDepartment() != null){
-      employee.getDepartment().removeEmployee();
+    // 2. ★ 핵심: 재직 중일 때만 부서 인원 -1 처리 (딱 한 번만 실행)
+    Department department = employee.getDepartment();
+    if (employee.getStatus() == EmployeeStatus.ACTIVE && department != null) {
+      department.removeEmployee(); // 메모리에서 감소
+      departmentRepository.save(department); // DB에 즉시 반영 (강제 업데이트)
     }
 
+    // 3. 로그 기록
     ChangeLog logEntity = ChangeLog.builder()
         .type(ChangeLogType.DELETED)
         .employeeNumber(employee.getEmployeeNumber())
-        .memo("직원 삭제")
+        .memo("직원 퇴사 처리 (부서 인원 차감)")
         .ipAddress(ipAddress)
         .build();
     changeLogRepository.save(logEntity);
 
+    // 4. 퇴사 상태로 변경 (삭제 안 함)
+    employee.resign();
+
+    // (선택사항) 퇴사자 사진을 남겨두고 싶다면 아래 if문은 삭제하세요.
     if (employee.getProfileImage() != null) {
       binaryContentService.delete(employee.getProfileImage().getId());
     }
-    repository.delete(employee);
   }
 
   private BinaryContent uploadProfileImage(MultipartFile profile) {
