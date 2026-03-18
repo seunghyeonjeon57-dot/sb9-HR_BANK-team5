@@ -50,7 +50,7 @@ public class DataInitializer implements CommandLineRunner {
       Random random = new Random();
 
       // 3. 사원 10명 삽입 (Faker 없이 자바 기본 기능 사용)
-      IntStream.rangeClosed(1, 10).forEach(i -> {
+      IntStream.rangeClosed(1, 50).forEach(i -> {
         String name = lastNames.get(random.nextInt(lastNames.size())) +
             firstNames.get(random.nextInt(firstNames.size()));
 

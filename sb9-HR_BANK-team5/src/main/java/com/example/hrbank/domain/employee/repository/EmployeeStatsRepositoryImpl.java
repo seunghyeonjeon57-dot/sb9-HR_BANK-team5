@@ -26,7 +26,8 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
   public List<EmployeeEventCount> totalEventCounts(LocalDate from, LocalDate to) {
     Map<LocalDate,Long> joinMap = factory.select(employee.hireDate,employee.count())
         .from(employee)
-        .where(employee.hireDate.between(from,to))
+        //수정
+        .where(hireDateBetween(from, to), employee.hireDate.isNotNull())
         .groupBy(employee.hireDate)
         .fetch()
         .stream()
@@ -35,7 +36,8 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
     Map<LocalDate, Long> quitMap = factory
         .select(employee.resignationDate, employee.count())
         .from(employee)
-        .where(employee.resignationDate.between(from, to))
+        //수정
+        .where(resignationDateBetween(from, to),employee.resignationDate.isNotNull())
         .groupBy(employee.resignationDate)
         .fetch()
         .stream()
@@ -87,19 +89,32 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
 
     return count != null ?count :0L;
   }
-
+  //수정 파트
   @Override
   public long totalEmployeeBefore(LocalDate date) {
     Long count=factory
         .select(employee.count())
         .from(employee)
         .where(
-            employee.hireDate.before(date),
-            employee.resignationDate.isNull()
-                .or(employee.resignationDate.goe(date))
+            beforeHireDate(date),      // 👈 수정한 조건 1
+            validResignationDate(date) // 👈 수정한 조건 2
         )
         .fetchOne();
     return count !=null ? count:0L;
+  }
+
+  // 💡 추가된 부품 2개 (null 에러 방지용)
+  private BooleanExpression beforeHireDate(LocalDate date) {
+    return date != null ? employee.hireDate.before(date) : null;
+  }
+
+  private BooleanExpression validResignationDate(LocalDate date) {
+    return date != null ? employee.resignationDate.isNull().or(employee.resignationDate.goe(date)) : null;
+  }
+
+  private BooleanExpression resignationDateBetween(LocalDate from, LocalDate to) {
+    if (from == null || to == null) return null;
+    return employee.resignationDate.between(from, to);
   }
 
   public List<EmployeeEventCount> mergeEvents(LocalDate from,LocalDate to,Map<LocalDate,Long> joinMap,Map<LocalDate,Long> quitMap){

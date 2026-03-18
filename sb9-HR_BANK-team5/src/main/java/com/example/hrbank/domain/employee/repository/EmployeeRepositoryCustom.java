@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EmployeeRepositoryCustom {
-  public List<Employee> totalEmployee(EmployeeSearchRequest request);
+  public List<Employee> totalEmployee(EmployeeSearchRequest request,String lastValue,Long lastId);
   public Long totalCountEmployee(EmployeeSearchRequest request);
 
 

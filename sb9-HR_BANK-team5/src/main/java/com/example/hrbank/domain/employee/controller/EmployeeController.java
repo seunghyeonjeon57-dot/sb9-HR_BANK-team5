@@ -1,7 +1,6 @@
 package com.example.hrbank.domain.employee.controller;
 
 
-import com.example.hrbank.domain.binarycontent.entity.BinaryContent;
 import com.example.hrbank.domain.employee.controller.api.EmployeeControllerApi;
 import com.example.hrbank.domain.employee.dto.data.CursorPageResponseEmployeeDto;
 import com.example.hrbank.domain.employee.dto.data.EmployeeDistributionDto;
@@ -13,10 +12,8 @@ import com.example.hrbank.domain.employee.dto.request.EmployeeUpdateRequest;
 import com.example.hrbank.domain.employee.dto.request.StatRequest;
 import com.example.hrbank.domain.employee.dto.request.StatsCountRequest;
 import com.example.hrbank.domain.employee.dto.request.StatsDepartmentRequest;
-import com.example.hrbank.domain.employee.repository.EmployeeRepository;
 import com.example.hrbank.domain.employee.service.EmployeeService;
 import com.example.hrbank.domain.employee.service.EmployeeStatsService;
-import com.example.hrbank.domain.employee.service.Impl.EmployeeServiceImpl;
 import com.example.hrbank.global.util.IpUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -27,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -57,17 +55,25 @@ public class EmployeeController implements EmployeeControllerApi {
   @Override
   @GetMapping
   public ResponseEntity<CursorPageResponseEmployeeDto> searchEmployees(@ModelAttribute EmployeeSearchRequest request) {
+    System.out.println(">>> [REQ] idAfter: " + request.idAfter() + " | size: " + request.size() + " | sort: " + request.sortField());
+
+    CursorPageResponseEmployeeDto response = employeeService.searchEmployees(request);
+
+    // [LOG] 백엔드가 보낼 응답 값 확인
+    System.out.println("<<< [RES] nextIdAfter: " + response.nextIdAfter() + " | hasNext: " + response.hasNext() + " | count: " + response.content().size());
+    System.out.println("--------------------------------------------------");
     return ResponseEntity.ok(employeeService.searchEmployees(request));
   }
 
   @Override
   @GetMapping("/{id}")
   public ResponseEntity<EmployeeDto> searchEmployeeById(@PathVariable("id") Long id) { // 팩트: @PathVariable 필수
+
     return ResponseEntity.ok(employeeService.searchEmployeeById(id));
   }
 
   @Override
-  @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<EmployeeDto> updateEmployee(
       @PathVariable("id") Long id,
       @RequestPart("employee") EmployeeUpdateRequest employeeUpdateRequest,

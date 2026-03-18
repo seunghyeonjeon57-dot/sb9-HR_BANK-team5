@@ -20,7 +20,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@Tag(name= "changeLog",description = "직원 정보 수정 이력 관리 API")
+@Tag(name= "직원 정보 수정 이력 관리",description = "직원 정보 수정 이력 관리 API")
 public interface ChangeLogControllerApi {
   @Operation(summary = "직원 정보 수정 이력 목록 조회",description = "직원 정보 수정 이력 목록을 조회합니다. 상세 변경 내용은 포함되지 않습니다. ")
   @ApiResponses(value={

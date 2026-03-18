@@ -27,7 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name="Employee",description = "직원 관리 API")
+@Tag(name="직원 관리",description = "직원 관리 API")
 public interface EmployeeControllerApi {
 
   @Operation(summary ="직원 등록",description = "새로운 직원을 등록합니다.",
