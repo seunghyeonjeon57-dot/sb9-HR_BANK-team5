@@ -37,12 +37,23 @@ public class Department extends BaseTimeEntity {
   @Column(name = "employee_count", nullable = false)
   private Integer employeeCount;
 
+
   @Builder
   public Department(String name, String description, LocalDate establishedDate , Integer employeeCount ){
     this.name = name;
     this.description = description;
     this.establishedDate = establishedDate;
     this.employeeCount = employeeCount;
+  }
+
+  public void addEmployee() {
+    this.employeeCount++;
+  }
+
+  public void removeEmployee() {
+    if (this.employeeCount > 0) {
+      this.employeeCount--;
+    }
   }
 
 //  public static Type builder() {

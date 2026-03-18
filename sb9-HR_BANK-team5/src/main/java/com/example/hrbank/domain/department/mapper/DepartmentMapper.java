@@ -11,17 +11,28 @@ import org.mapstruct.Mapper;
 public interface DepartmentMapper {
 
   DepartmentDto toDto(Department department);
-
   List<DepartmentDto> toDtoList(List<Department> entities);
 
-  default CursorPageResponseDepartmentDto toCursorPageDto(List<Department> entities, Integer size, Long totalElements, boolean hasNext) {
+  default CursorPageResponseDepartmentDto toCursorPageDto(List<Department> entities, Integer size, Long totalElements, boolean hasNext, String sortField) {
     List<DepartmentDto> content = toDtoList(entities);
-    Long lastId = entities.isEmpty() ? null : entities.get(entities.size()-1).getId();
     String encodedCursor = null;
-    if (lastId != null) {
-      encodedCursor = Base64.getEncoder().encodeToString(String.valueOf(lastId).getBytes());
-    }
-    return new CursorPageResponseDepartmentDto(content, encodedCursor,lastId, size, totalElements, hasNext);
-  }
 
+    if (!entities.isEmpty()) {
+      Department lastItem = entities.get(entities.size() - 1);
+
+      // 정렬 필드에 맞는 값을 추출하여 커서에 포함
+      String lastValue = switch (sortField) {
+        case "name" -> lastItem.getName();
+        case "establishedDate" -> lastItem.getEstablishedDate().toString();
+        default -> lastItem.getId().toString();
+      };
+
+      String jsonCursor = String.format("{\"v\":\"%s\",\"id\":%d}", lastValue, lastItem.getId());
+      encodedCursor = Base64.getEncoder().encodeToString(jsonCursor.getBytes());
+    }
+
+    Long nextIdAfter = entities.isEmpty() ? null : entities.get(entities.size()-1).getId();
+
+    return new CursorPageResponseDepartmentDto(content, encodedCursor, nextIdAfter, size, totalElements, hasNext);
+  }
 }

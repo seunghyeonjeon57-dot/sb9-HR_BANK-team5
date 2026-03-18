@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Tag(name = "Department", description = "Department API")
+@Tag(name = "부서 관리", description = "부서 관리 API")
 public interface DepartmentApi {
 
   @Operation(summary = "부서 등록", operationId = "createDepartment")
