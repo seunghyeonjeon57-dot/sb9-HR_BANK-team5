@@ -46,10 +46,12 @@ public class EmployeeController implements EmployeeControllerApi {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<EmployeeDto> createEmployee(
       @RequestPart("employee") EmployeeCreateRequest employeeCreateRequest,
-      @RequestPart(value = "profile", required = false) MultipartFile profile
+      @RequestPart(value = "profile", required = false) MultipartFile profile,
+      HttpServletRequest request
   ) {
+    String ipAddress = IpUtil.getUserIp(request);
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(employeeService.createEmployee(employeeCreateRequest, profile));
+        .body(employeeService.createEmployee(employeeCreateRequest, profile,ipAddress));
   }
 
   @Override
