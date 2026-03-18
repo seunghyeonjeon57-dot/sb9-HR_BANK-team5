@@ -2,6 +2,7 @@ package com.example.hrbank.domain.employee.dto.request;
 
 import com.example.hrbank.domain.employee.entity.enums.EmployeeStatus;
 import java.time.LocalDate;
+import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public record StatsCountRequest(

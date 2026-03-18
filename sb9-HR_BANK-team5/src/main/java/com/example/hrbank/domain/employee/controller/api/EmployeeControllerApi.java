@@ -91,6 +91,7 @@ public interface EmployeeControllerApi {
   })
   public ResponseEntity<EmployeeDto> updateEmployee(
       @Parameter(description = "수정할 직원 ID", required = true) Long id,
+      @Parameter(description = "수정 정보", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
       @RequestPart("employee") EmployeeUpdateRequest employeeUpdateRequest,
       @RequestPart(value="profile",required = false) MultipartFile profile,
       HttpServletRequest request
