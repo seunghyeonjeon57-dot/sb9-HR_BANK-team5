@@ -1,6 +1,6 @@
 package com.example.hrbank.domain.employee.entity.enums;
 
-public enum ChannelType {
+public enum ChangeLogType {
   CREATED,
   UPDATED,
   DELETED

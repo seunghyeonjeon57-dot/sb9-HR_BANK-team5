@@ -1,6 +1,6 @@
 package com.example.hrbank.domain.employee.dto.request;
 
-import com.example.hrbank.domain.employee.entity.enums.ChannelType;
+import com.example.hrbank.domain.employee.entity.enums.ChangeLogType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -9,7 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 @Schema(description = "이력 목록 검색 요청")
 public record ChangeLogSearchRequest(
     String employeeNumber,
-    ChannelType type,
+    ChangeLogType type,
     String memo,
     String ipAddress,
     @DateTimeFormat(iso = ISO.DATE_TIME)

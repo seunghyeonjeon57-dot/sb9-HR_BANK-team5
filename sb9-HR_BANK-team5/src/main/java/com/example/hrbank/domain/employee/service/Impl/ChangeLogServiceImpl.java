@@ -7,13 +7,12 @@ import com.example.hrbank.domain.employee.dto.data.DiffDto;
 import com.example.hrbank.domain.employee.dto.request.ChangeLogSearchRequest;
 import com.example.hrbank.domain.employee.entity.ChangeLog;
 import com.example.hrbank.domain.employee.entity.Employee;
-import com.example.hrbank.domain.employee.entity.enums.ChannelType;
+import com.example.hrbank.domain.employee.entity.enums.ChangeLogType;
 import com.example.hrbank.domain.employee.mapper.ChangeLogMapper;
 import com.example.hrbank.domain.employee.repository.ChangeLogRepository;
 import com.example.hrbank.domain.employee.repository.EmployeeRepository;
 import com.example.hrbank.domain.employee.service.ChangeLogService;
 import jakarta.persistence.EntityNotFoundException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +28,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
   private final EmployeeRepository employeeRepository;
   @Override
   @Transactional
-  public void createChannelLog(Employee employee, ChannelType type, String employeeNumber,
+  public void createChannelLog(Employee employee, ChangeLogType type, String employeeNumber,
       List<DiffDto> diffs, String memo, String ipAddress) {
     ChangeLog log= ChangeLog.builder()
         .type(type)
