@@ -20,8 +20,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.BufferedWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -48,14 +50,17 @@ public class BasicBackupService implements BackupService {
   @Override
   @Transactional
   public BackupResponse runBackup(String worker) {
+    // 이미 진행 중인 백업이 있는지 확인 (뮤텍스 락과 유사한 개념)
     if (backupRepository.existsByStatus(BackupStatus.IN_PROGRESS)) {
       throw new BusinessException(ErrorCode.BACKUP_ALREADY_IN_PROGRESS);
     }
 
+    // 1. 최초 백업 시점을 현실적인 과거(2025년 1월 1일)로 설정
     LocalDateTime lastBackupTime = backupRepository.findFirstByStatusOrderByStartedAtDesc(BackupStatus.COMPLETED)
         .map(BackupHistory::getStartedAt)
-        .orElse(LocalDateTime.MIN);
+        .orElse(LocalDateTime.of(2025, 1, 1, 0, 0));
 
+    // 마지막 백업 이후 변경된 데이터가 있는지 확인
     boolean needsBackup = changeLogRepository.existsByUpdatedAtAfter(lastBackupTime);
 
     if (!needsBackup) {
@@ -68,6 +73,7 @@ public class BasicBackupService implements BackupService {
       return backupMapper.toResponse(backupRepository.save(skipHistory));
     }
 
+    // 백업 시작 기록 저장
     BackupHistory history = backupRepository.save(BackupHistory.builder()
         .worker(worker)
         .startedAt(LocalDateTime.now())
@@ -118,17 +124,37 @@ public class BasicBackupService implements BackupService {
         .orElseThrow(() -> new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR));
   }
 
+  /**
+   * CSV 백업 수행 (엑셀 호환성 및 한글 깨짐 수정 완료)
+   */
   private Long performCsvBackup() throws Exception {
     Path tempFile = Files.createTempFile("backup_", ".csv");
-    try (Stream<Employee> employeeStream = employeeRepository.streamAllBy();
-        PrintWriter writer = new PrintWriter(Files.newBufferedWriter(tempFile))) {
+
+    // 2. UTF-8 BOM과 명시적 인코딩을 사용하여 엑셀 가독성 확보
+    try (BufferedWriter bw = Files.newBufferedWriter(tempFile, StandardCharsets.UTF_8);
+        PrintWriter writer = new PrintWriter(bw);
+        Stream<Employee> employeeStream = employeeRepository.streamAllBy()) {
+
+      // 엑셀이 UTF-8 인코딩을 인식할 수 있도록 BOM(\uFEFF)을 파일의 맨 앞에 씁니다.
+      writer.write('\uFEFF');
+
+      // 헤더 작성
       writer.println("ID,Name,Email,EmployeeNumber,Department,Position,HireDate,Status");
+
+      // 데이터 작성 (Stream을 사용하여 대용량 데이터 처리)
       employeeStream.forEach(emp -> writer.printf("%d,%s,%s,%s,%s,%s,%s,%s%n",
-          emp.getId(), emp.getName(), emp.getEmail(), emp.getEmployeeNumber(),
+          emp.getId(),
+          emp.getName(),
+          emp.getEmail(),
+          emp.getEmployeeNumber(),
           emp.getDepartment() != null ? emp.getDepartment().getName() : "N/A",
-          emp.getPosition(), emp.getHireDate(), emp.getStatus()));
+          emp.getPosition(),
+          emp.getHireDate(),
+          emp.getStatus()));
+
       writer.flush();
     }
+
     BinaryContentRequest request = new BinaryContentRequest(
         tempFile.getFileName().toString(), "text/csv", Files.size(tempFile));
     BinaryContentDto savedFile = binaryContentService.save(request, tempFile);
@@ -136,12 +162,17 @@ public class BasicBackupService implements BackupService {
     return savedFile.id();
   }
 
+  /**
+   * 에러 발생 시 로그를 파일로 저장
+   */
   private Long saveErrorLog(Exception e) {
     try {
       Path logFile = Files.createTempFile("error_", ".log");
       StringWriter sw = new StringWriter();
       e.printStackTrace(new PrintWriter(sw));
-      Files.writeString(logFile, sw.toString());
+
+      Files.writeString(logFile, sw.toString(), StandardCharsets.UTF_8);
+
       BinaryContentRequest request = new BinaryContentRequest(
           logFile.getFileName().toString(), "text/plain", Files.size(logFile));
       BinaryContentDto savedLog = binaryContentService.save(request, logFile);
