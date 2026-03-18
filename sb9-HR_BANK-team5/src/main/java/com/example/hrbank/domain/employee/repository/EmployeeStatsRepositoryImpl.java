@@ -133,9 +133,12 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
     return status != null ? employee.status.eq(status) : null;
   }
   public BooleanExpression hireDateBetween(LocalDate from,LocalDate to){
-    if(from == null || to== null)return null;
-    return employee.hireDate.between(from,to);
+    if (from == null && to == null) return null;
 
+    if (from == null) return employee.hireDate.loe(to);
+    if (to == null) return employee.hireDate.goe(from);
+
+    return employee.hireDate.between(from, to);
   }
 
 
