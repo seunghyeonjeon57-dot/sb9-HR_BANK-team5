@@ -5,7 +5,7 @@ import com.example.hrbank.domain.employee.dto.data.ChangeLogDto;
 import com.example.hrbank.domain.employee.dto.data.CursorPageResponseChangeLogDto;
 import com.example.hrbank.domain.employee.entity.ChangeLog;
 import com.example.hrbank.domain.employee.entity.Employee;
-import com.example.hrbank.domain.employee.entity.enums.ChannelType;
+import com.example.hrbank.domain.employee.entity.enums.ChangeLogType;
 import java.util.Base64;
 import java.util.List;
 import org.mapstruct.Mapper;
@@ -20,7 +20,7 @@ public interface ChangeLogMapper {
 
   default CursorPageResponseChangeLogDto CursorPageResponse(
       List<ChangeLog> entities,
-      ChannelType type,
+      ChangeLogType type,
       Integer size,
       Long totalElements,
       boolean hasNext

@@ -7,7 +7,6 @@ import com.example.hrbank.domain.binarycontent.repository.BinaryContentRepositor
 import com.example.hrbank.domain.binarycontent.service.BinaryContentService;
 import com.example.hrbank.domain.department.entity.Department;
 import com.example.hrbank.domain.department.repository.DepartmentRepository;
-import com.example.hrbank.domain.employee.dto.data.ChangeLogDto;
 import com.example.hrbank.domain.employee.dto.data.CursorPageResponseEmployeeDto;
 import com.example.hrbank.domain.employee.dto.data.EmployeeDto;
 import com.example.hrbank.domain.employee.dto.request.EmployeeCreateRequest;
@@ -15,7 +14,7 @@ import com.example.hrbank.domain.employee.dto.request.EmployeeSearchRequest;
 import com.example.hrbank.domain.employee.dto.request.EmployeeUpdateRequest;
 import com.example.hrbank.domain.employee.entity.ChangeLog;
 import com.example.hrbank.domain.employee.entity.Employee;
-import com.example.hrbank.domain.employee.entity.enums.ChannelType;
+import com.example.hrbank.domain.employee.entity.enums.ChangeLogType;
 import com.example.hrbank.domain.employee.entity.enums.EmployeeStatus;
 import com.example.hrbank.domain.employee.mapper.EmployeeMapper;
 import com.example.hrbank.domain.employee.repository.ChangeLogRepository;
@@ -101,7 +100,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 
     ChangeLog log = ChangeLog.builder()
-        .type(ChannelType.UPDATED)
+        .type(ChangeLogType.UPDATED)
         .employeeNumber(employee.getEmployeeNumber())
         .memo(request.memo())
         .ipAddress(ipAddress)
@@ -154,7 +153,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 
     ChangeLog log = ChangeLog.builder()
-        .type(ChannelType.DELETED)
+        .type(ChangeLogType.DELETED)
         .employeeNumber(employee.getEmployeeNumber())
         .memo("직원을 삭제합니다")
         .ipAddress(ipAddress)

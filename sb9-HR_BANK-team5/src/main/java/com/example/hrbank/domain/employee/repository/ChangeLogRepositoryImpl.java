@@ -3,7 +3,7 @@ package com.example.hrbank.domain.employee.repository;
 import com.example.hrbank.domain.employee.dto.request.ChangeLogSearchRequest;
 import com.example.hrbank.domain.employee.entity.ChangeLog;
 import com.example.hrbank.domain.employee.entity.QChangeLog;
-import com.example.hrbank.domain.employee.entity.enums.ChannelType;
+import com.example.hrbank.domain.employee.entity.enums.ChangeLogType;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -63,7 +63,7 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
     return StringUtils.hasText(ip) ? changeLog.ipAddress.contains(ip) : null;
   }
 
-  private BooleanExpression eqType(ChannelType type) {
+  private BooleanExpression eqType(ChangeLogType type) {
     return type != null ? changeLog.type.eq(type) : null;
   }
 

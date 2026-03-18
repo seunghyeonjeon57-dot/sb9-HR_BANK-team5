@@ -5,9 +5,9 @@ import com.example.hrbank.domain.employee.dto.data.ChangeLogDetailDto;
 import com.example.hrbank.domain.employee.dto.data.ChangeLogDto;
 import com.example.hrbank.domain.employee.dto.data.DiffDto;
 import com.example.hrbank.domain.employee.entity.ChangeLog;
-import com.example.hrbank.domain.employee.entity.ChannelDiff;
+import com.example.hrbank.domain.employee.entity.ChangeLogDiff;
 import com.example.hrbank.domain.employee.entity.Employee;
-import com.example.hrbank.domain.employee.entity.enums.ChannelType;
+import com.example.hrbank.domain.employee.entity.enums.ChangeLogType;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-03-18T09:21:43+0900",
+    date = "2026-03-18T10:33:21+0900",
     comments = "version: 1.5.5.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-9.3.1.jar, environment: Java 17.0.17 (Amazon.com Inc.)"
 )
 @Component
@@ -30,7 +30,7 @@ public class ChangeLogMapperImpl implements ChangeLogMapper {
 
         LocalDateTime at = null;
         Long id = null;
-        ChannelType type = null;
+        ChangeLogType type = null;
         String employeeNumber = null;
         String memo = null;
         String ipAddress = null;
@@ -70,7 +70,7 @@ public class ChangeLogMapperImpl implements ChangeLogMapper {
         Long id = null;
         String employeeNumber = null;
         String memo = null;
-        ChannelType type = null;
+        ChangeLogType type = null;
         LocalDateTime at = null;
         String ipAddress = null;
         List<DiffDto> diffs = null;
@@ -81,7 +81,7 @@ public class ChangeLogMapperImpl implements ChangeLogMapper {
             type = entity.getType();
             at = entity.getCreatedAt();
             ipAddress = entity.getIpAddress();
-            diffs = channelDiffListToDiffDtoList( entity.getDiffs() );
+            diffs = changeLogDiffListToDiffDtoList( entity.getDiffs() );
         }
         Long profileImageId = null;
         String employeeName = null;
@@ -110,8 +110,8 @@ public class ChangeLogMapperImpl implements ChangeLogMapper {
         return id;
     }
 
-    protected DiffDto channelDiffToDiffDto(ChannelDiff channelDiff) {
-        if ( channelDiff == null ) {
+    protected DiffDto changeLogDiffToDiffDto(ChangeLogDiff changeLogDiff) {
+        if ( changeLogDiff == null ) {
             return null;
         }
 
@@ -119,23 +119,23 @@ public class ChangeLogMapperImpl implements ChangeLogMapper {
         String before = null;
         String after = null;
 
-        propertyName = channelDiff.getPropertyName();
-        before = channelDiff.getBefore();
-        after = channelDiff.getAfter();
+        propertyName = changeLogDiff.getPropertyName();
+        before = changeLogDiff.getBefore();
+        after = changeLogDiff.getAfter();
 
         DiffDto diffDto = new DiffDto( propertyName, before, after );
 
         return diffDto;
     }
 
-    protected List<DiffDto> channelDiffListToDiffDtoList(List<ChannelDiff> list) {
+    protected List<DiffDto> changeLogDiffListToDiffDtoList(List<ChangeLogDiff> list) {
         if ( list == null ) {
             return null;
         }
 
         List<DiffDto> list1 = new ArrayList<DiffDto>( list.size() );
-        for ( ChannelDiff channelDiff : list ) {
-            list1.add( channelDiffToDiffDto( channelDiff ) );
+        for ( ChangeLogDiff changeLogDiff : list ) {
+            list1.add( changeLogDiffToDiffDto( changeLogDiff ) );
         }
 
         return list1;
