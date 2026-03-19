@@ -13,5 +13,7 @@ spring:
 
 
 app:
-  storage:
-    path: "/tmp/storage"
+  supabase:
+    url: https://keqqwlmmmdwoyspihrtx.supabase.co
+    api-key: ${SUPABASE_KEY}
+    bucket: hr-storage
