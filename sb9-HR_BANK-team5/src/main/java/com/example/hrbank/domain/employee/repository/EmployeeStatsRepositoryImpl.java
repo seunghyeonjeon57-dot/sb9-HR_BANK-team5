@@ -26,7 +26,7 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
   public List<EmployeeEventCount> totalEventCounts(LocalDate from, LocalDate to) {
     Map<LocalDate,Long> joinMap = factory.select(employee.hireDate,employee.count())
         .from(employee)
-        //수정
+
         .where(hireDateBetween(from, to), employee.hireDate.isNotNull())
         .groupBy(employee.hireDate)
         .fetch()
@@ -36,7 +36,7 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
     Map<LocalDate, Long> quitMap = factory
         .select(employee.resignationDate, employee.count())
         .from(employee)
-        //수정
+
         .where(resignationDateBetween(from, to),employee.resignationDate.isNotNull())
         .groupBy(employee.resignationDate)
         .fetch()
@@ -50,15 +50,15 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
   public List<EmployeeDistributionDto> totalEmployeeDistribution(String groupBy, EmployeeStatus status) {
     String criteria = (groupBy == null || groupBy.isEmpty()) ? "department" : groupBy.toLowerCase();
 
-    // ✅ SELECT용 (가공 포함)
+
     com.querydsl.core.types.dsl.StringExpression selectExpr;
 
-    // ✅ GROUP BY용 (원본 컬럼)
+
     com.querydsl.core.types.dsl.StringExpression groupByExpr;
 
     if ("department".equals(criteria)) {
-      selectExpr = employee.department.name.coalesce("미지정"); // null → "미지정"
-      groupByExpr = employee.department.name; // 🔥 핵심: 원본 컬럼
+      selectExpr = employee.department.name.coalesce("미지정");
+      groupByExpr = employee.department.name;
     } else if ("position".equals(criteria)) {
       selectExpr = employee.position;
       groupByExpr = employee.position;
@@ -67,7 +67,7 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
     }
 
     var query = factory.select(Projections.constructor(EmployeeDistributionDto.class,
-            selectExpr,              // ✅ 가공된 값
+            selectExpr,
             employee.count(),
             Expressions.asNumber(0.0)))
         .from(employee);
@@ -77,7 +77,7 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
     }
 
     return query.where(statusEq(status))
-        .groupBy(groupByExpr) // ✅ 여기 수정됨
+        .groupBy(groupByExpr)
         .fetch();
   }
 
@@ -91,21 +91,21 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
 
     return count != null ?count :0L;
   }
-  //수정 파트
+
   @Override
   public long totalEmployeeBefore(LocalDate date) {
     Long count=factory
         .select(employee.count())
         .from(employee)
         .where(
-            beforeHireDate(date),      // 👈 수정한 조건 1
-            validResignationDate(date) // 👈 수정한 조건 2
+            beforeHireDate(date),
+            validResignationDate(date)
         )
         .fetchOne();
     return count !=null ? count:0L;
   }
 
-  // 💡 추가된 부품 2개 (null 에러 방지용)
+
   private BooleanExpression beforeHireDate(LocalDate date) {
     return date != null ? employee.hireDate.before(date) : null;
   }

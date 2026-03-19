@@ -1,7 +1,6 @@
 package com.example.hrbank.domain.department.entity;
 
 import com.example.hrbank.global.entity.BaseTimeEntity;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "departments")
 @Getter
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)  // JPA를 위한 기본 생성자
+@NoArgsConstructor(access = AccessLevel.PROTECTED)  
 public class Department extends BaseTimeEntity {
 
   @Id
@@ -56,9 +55,9 @@ public class Department extends BaseTimeEntity {
     }
   }
 
-//  public static Type builder() {
-//    return null;
-//  }
+
+
+
 
   public void update(String name, String description, LocalDate establishedDate) {
     this.name = name;

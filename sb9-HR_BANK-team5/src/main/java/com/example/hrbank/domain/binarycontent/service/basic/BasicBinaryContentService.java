@@ -77,9 +77,9 @@ public class BasicBinaryContentService implements BinaryContentService {
   @Transactional
   public void delete(Long id) {
 
-    //스토리지 먼저 삭제
+    
     storage.delete(id);
-    // DB 삭제
+    
     repository.findById(id)
         .ifPresent(repository::delete);
   }

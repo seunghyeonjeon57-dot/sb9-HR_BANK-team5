@@ -91,7 +91,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     String lastValue = null;
     Long lastId = 0L;
 
-    // 복합 커서 디코딩 (JSON 기반)
+    
     if (request.cursor() != null && !request.cursor().isBlank()) {
       try {
         byte[] decodedBytes = Base64.getDecoder().decode(request.cursor());
@@ -131,7 +131,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     BinaryContent newProfileImage = uploadProfileImage(profile);
     if (newProfileImage == null) newProfileImage = employee.getProfileImage();
 
-    // 로그 기록 준비
+    
     ChangeLog logEntity = ChangeLog.builder()
         .type(ChangeLogType.UPDATED)
         .employeeNumber(employee.getEmployeeNumber())
@@ -139,7 +139,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         .ipAddress(ipAddress)
         .build();
 
-    // 변경 내역 비교 (Diff)
+    
     if (!employee.getName().equals(request.name())) logEntity.addDiff("name", employee.getName(), request.name());
     if (!employee.getEmail().equals(request.email())) logEntity.addDiff("email", employee.getEmail(), request.email());
 
@@ -175,14 +175,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     Employee employee = repository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("사원이 없습니다."));
 
-    // 2. ★ 핵심: 재직 중일 때만 부서 인원 -1 처리 (딱 한 번만 실행)
+    
     Department department = employee.getDepartment();
     if (employee.getStatus() == EmployeeStatus.ACTIVE && department != null) {
-      department.removeEmployee(); // 메모리에서 감소
-      departmentRepository.save(department); // DB에 즉시 반영 (강제 업데이트)
+      department.removeEmployee(); 
+      departmentRepository.save(department); 
     }
 
-    // 3. 로그 기록
+    
     ChangeLog logEntity = ChangeLog.builder()
         .type(ChangeLogType.DELETED)
         .employeeNumber(employee.getEmployeeNumber())
@@ -191,10 +191,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         .build();
     changeLogRepository.save(logEntity);
 
-    // 4. 퇴사 상태로 변경 (삭제 안 함)
+    
     employee.resign();
 
-    // (선택사항) 퇴사자 사진을 남겨두고 싶다면 아래 if문은 삭제하세요.
+    
     if (employee.getProfileImage() != null) {
       binaryContentService.delete(employee.getProfileImage().getId());
     }
