@@ -75,3 +75,13 @@ tasks.withType(JavaCompile) {
 clean {
     delete file(querydslDir)
 }
+
+// 1. 빌드 시 plain jar가 생성되는 것을 막습니다.
+jar {
+    enabled = false
+}
+
+// 2. 실행 가능한 jar 파일 이름을 'app.jar'로 고정합니다.
+bootJar {
+    archiveFileName = 'app.jar'
+}
