@@ -50,17 +50,17 @@ public class BasicBackupService implements BackupService {
   @Override
   @Transactional
   public BackupResponse runBackup(String worker) {
-    // 이미 진행 중인 백업이 있는지 확인 (뮤텍스 락과 유사한 개념)
+    
     if (backupRepository.existsByStatus(BackupStatus.IN_PROGRESS)) {
       throw new BusinessException(ErrorCode.BACKUP_ALREADY_IN_PROGRESS);
     }
 
-    // 1. 최초 백업 시점을 현실적인 과거(2025년 1월 1일)로 설정
+    
     LocalDateTime lastBackupTime = backupRepository.findFirstByStatusOrderByStartedAtDesc(BackupStatus.COMPLETED)
         .map(BackupHistory::getStartedAt)
         .orElse(LocalDateTime.of(2025, 1, 1, 0, 0));
 
-    // 마지막 백업 이후 변경된 데이터가 있는지 확인
+    
     boolean needsBackup = changeLogRepository.existsByUpdatedAtAfter(lastBackupTime);
 
     if (!needsBackup) {
@@ -73,7 +73,7 @@ public class BasicBackupService implements BackupService {
       return backupMapper.toResponse(backupRepository.save(skipHistory));
     }
 
-    // 백업 시작 기록 저장
+    
     BackupHistory history = backupRepository.save(BackupHistory.builder()
         .worker(worker)
         .startedAt(LocalDateTime.now())
@@ -130,18 +130,18 @@ public class BasicBackupService implements BackupService {
   private Long performCsvBackup() throws Exception {
     Path tempFile = Files.createTempFile("backup_", ".csv");
 
-    // 2. UTF-8 BOM과 명시적 인코딩을 사용하여 엑셀 가독성 확보
+    
     try (BufferedWriter bw = Files.newBufferedWriter(tempFile, StandardCharsets.UTF_8);
         PrintWriter writer = new PrintWriter(bw);
         Stream<Employee> employeeStream = employeeRepository.streamAllBy()) {
 
-      // 엑셀이 UTF-8 인코딩을 인식할 수 있도록 BOM(\uFEFF)을 파일의 맨 앞에 씁니다.
+      
       writer.write('\uFEFF');
 
-      // 헤더 작성
+      
       writer.println("ID,Name,Email,EmployeeNumber,Department,Position,HireDate,Status");
 
-      // 데이터 작성 (Stream을 사용하여 대용량 데이터 처리)
+      
       employeeStream.forEach(emp -> writer.printf("%d,%s,%s,%s,%s,%s,%s,%s%n",
           emp.getId(),
           emp.getName(),

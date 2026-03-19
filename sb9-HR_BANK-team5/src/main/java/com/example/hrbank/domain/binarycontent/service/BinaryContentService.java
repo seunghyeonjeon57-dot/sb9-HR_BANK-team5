@@ -4,7 +4,6 @@ import com.example.hrbank.domain.binarycontent.dto.data.BinaryContentDto;
 import com.example.hrbank.domain.binarycontent.dto.request.BinaryContentRequest;
 import com.example.hrbank.domain.binarycontent.entity.BinaryContent;
 import java.nio.file.Path;
-import nonapi.io.github.classgraph.utils.LogNode;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 

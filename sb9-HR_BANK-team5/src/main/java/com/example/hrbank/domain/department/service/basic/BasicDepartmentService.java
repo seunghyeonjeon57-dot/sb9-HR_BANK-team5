@@ -1,7 +1,9 @@
 package com.example.hrbank.domain.department.service.basic;
 
 import com.example.hrbank.domain.department.dto.data.DepartmentDto;
-import com.example.hrbank.domain.department.dto.request.*;
+import com.example.hrbank.domain.department.dto.request.DepartmentCreateRequest;
+import com.example.hrbank.domain.department.dto.request.DepartmentSearchRequest;
+import com.example.hrbank.domain.department.dto.request.DepartmentUpdateRequest;
 import com.example.hrbank.domain.department.dto.response.CursorPageResponseDepartmentDto;
 import com.example.hrbank.domain.department.entity.Department;
 import com.example.hrbank.domain.department.mapper.DepartmentMapper;
@@ -11,9 +13,14 @@ import com.example.hrbank.domain.employee.repository.EmployeeRepository;
 import com.example.hrbank.global.error.BusinessException;
 import com.example.hrbank.global.error.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.*;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +42,7 @@ public class BasicDepartmentService implements DepartmentService {
 
     String lastValue = null;
     Long lastId = 0L;
-    // 복합 커서 디코딩 ({"v":"값", "id":번호})
+    
     if (request.cursor() != null && !request.cursor().isBlank()) {
       try {
         byte[] decodedBytes = Base64.getDecoder().decode(request.cursor());
@@ -62,14 +69,21 @@ public class BasicDepartmentService implements DepartmentService {
   }
 
 
-  // 나머지 메서드(create, find, update, delete)는 로직상 완벽하므로 수정 없이 사용하시면 됩니다.
+  
   @Override @Transactional public DepartmentDto create(DepartmentCreateRequest r, Integer c) {
-    if (departmentRepository.existsByName(r.name())) throw new BusinessException(ErrorCode.DEPT_NAME_DUPLICATION);
+    if (departmentRepository.existsByName(r.name())) throw new IllegalArgumentException("부서이름이 이미 존재합니다.");
     Department d = new Department(r.name(), r.description(), r.establishedDate(), c);
     return departmentMapper.toDto(departmentRepository.save(d));
   }
-  @Override @Transactional(readOnly = true) public Department findEntityById(Long id) { return departmentRepository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.DEPT_NOT_FOUND)); }
+  @Override @Transactional(readOnly = true) public Department findEntityById(Long id) { return departmentRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 Id를 가진 부서가 존재하지 않습니다.")); }
   @Override @Transactional(readOnly = true) public DepartmentDto find(Long id) { return departmentMapper.toDto(findEntityById(id)); }
-  @Override @Transactional public DepartmentDto update(Long id, DepartmentUpdateRequest r) { Department d = findEntityById(id); d.update(r.name(), r.description(), r.establishedDate()); return departmentMapper.toDto(d); }
-  @Override @Transactional public void delete(Long id) { if (employeeRepository.existsByDepartmentId(id)) throw new BusinessException(ErrorCode.DEPT_DELETE_NOT_ALLOWED); departmentRepository.delete(findEntityById(id)); }
+  @Override @Transactional public DepartmentDto update(Long id, DepartmentUpdateRequest r) {
+    Department d = findEntityById(id);
+    if (!d.getName().equals(r.name()) && departmentRepository.existsByName(r.name())) {
+      throw new IllegalArgumentException("부서 이름이 이미 존재합니다.");
+    }
+
+    d.update(r.name(), r.description(), r.establishedDate());
+    return departmentMapper.toDto(d); }
+  @Override @Transactional public void delete(Long id) { if (employeeRepository.existsByDepartmentId(id)) throw new IllegalStateException("소속 직원이 있는 부서는 삭제할 수 없습니다."); departmentRepository.delete(findEntityById(id)); }
 }

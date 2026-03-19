@@ -26,7 +26,7 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
   public List<EmployeeEventCount> totalEventCounts(LocalDate from, LocalDate to) {
     Map<LocalDate,Long> joinMap = factory.select(employee.hireDate,employee.count())
         .from(employee)
-        //수정
+
         .where(hireDateBetween(from, to), employee.hireDate.isNotNull())
         .groupBy(employee.hireDate)
         .fetch()
@@ -36,7 +36,7 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
     Map<LocalDate, Long> quitMap = factory
         .select(employee.resignationDate, employee.count())
         .from(employee)
-        //수정
+
         .where(resignationDateBetween(from, to),employee.resignationDate.isNotNull())
         .groupBy(employee.resignationDate)
         .fetch()
@@ -48,23 +48,26 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
 
   @Override
   public List<EmployeeDistributionDto> totalEmployeeDistribution(String groupBy, EmployeeStatus status) {
-    // 1. 기본값 및 소문자 처리
     String criteria = (groupBy == null || groupBy.isEmpty()) ? "department" : groupBy.toLowerCase();
 
-    // 2. Expression 타입을 StringExpression으로 지정 (as 메서드 사용 가능해짐)
-    com.querydsl.core.types.dsl.StringExpression groupPath;
+
+    com.querydsl.core.types.dsl.StringExpression selectExpr;
+
+
+    com.querydsl.core.types.dsl.StringExpression groupByExpr;
 
     if ("department".equals(criteria)) {
-      groupPath = employee.department.name.coalesce("미지정");
+      selectExpr = employee.department.name.coalesce("미지정");
+      groupByExpr = employee.department.name;
     } else if ("position".equals(criteria)) {
-      groupPath = employee.position;
+      selectExpr = employee.position;
+      groupByExpr = employee.position;
     } else {
       throw new IllegalArgumentException("지원하지 않는 그룹화 기준입니다.");
     }
 
-    // 3. 타입 안정성을 위해 JPAQuery를 명시적으로 선언 (Tuple 에러 방지)
     var query = factory.select(Projections.constructor(EmployeeDistributionDto.class,
-            groupPath, // 팩트: 여기서 .as() 안 써도 생성자 순서만 맞으면 들어갑니다.
+            selectExpr,
             employee.count(),
             Expressions.asNumber(0.0)))
         .from(employee);
@@ -73,9 +76,8 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
       query.leftJoin(employee.department);
     }
 
-    // 4. fetch() 결과가 List<EmployeeDistributionDto>임을 보장함
     return query.where(statusEq(status))
-        .groupBy(groupPath)
+        .groupBy(groupByExpr)
         .fetch();
   }
 
@@ -89,21 +91,21 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
 
     return count != null ?count :0L;
   }
-  //수정 파트
+
   @Override
   public long totalEmployeeBefore(LocalDate date) {
     Long count=factory
         .select(employee.count())
         .from(employee)
         .where(
-            beforeHireDate(date),      // 👈 수정한 조건 1
-            validResignationDate(date) // 👈 수정한 조건 2
+            beforeHireDate(date),
+            validResignationDate(date)
         )
         .fetchOne();
     return count !=null ? count:0L;
   }
 
-  // 💡 추가된 부품 2개 (null 에러 방지용)
+
   private BooleanExpression beforeHireDate(LocalDate date) {
     return date != null ? employee.hireDate.before(date) : null;
   }
@@ -144,6 +146,3 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
 
 
 }
-
-
-

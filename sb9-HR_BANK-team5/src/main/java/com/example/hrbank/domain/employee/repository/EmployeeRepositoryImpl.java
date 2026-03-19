@@ -33,7 +33,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
             containsEmployeeNumber(request.employeeNumber()),
             eqEmployeeStatus(request.status()),
             betweenHireDate(request.hireDateFrom(), request.hireDateTo()),
-            // 핵심: 복합 커서 조건문 적용
+            
             compositeCursorCondition(lastValue, lastId, sortField, direction)
         )
         .orderBy(getSortOrder(sortField, direction))
@@ -57,13 +57,13 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
         .fetchOne();
   }
 
-  // 복합 커서 로직: (기준값 > 마지막값) OR (기준값 == 마지막값 AND ID > 마지막ID)
+  
   private BooleanExpression compositeCursorCondition(String lastValue, Long lastId, String sortField, String direction) {
     if (lastValue == null || lastId == null) return null;
 
     boolean isAsc = "asc".equalsIgnoreCase(direction);
 
-    // 정렬 대상 필드를 문자열로 통일하여 비교
+    
     StringExpression targetField = switch (sortField) {
       case "name" -> employee.name;
       case "employeeNumber" -> employee.employeeNumber;
@@ -76,7 +76,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
           .or(targetField.eq(lastValue).and(employee.id.gt(lastId)));
     } else {
       return targetField.lt(lastValue)
-          .or(targetField.eq(lastValue).and(employee.id.gt(lastId))); // 타이브레이커 ID는 항상 gt
+          .or(targetField.eq(lastValue).and(employee.id.gt(lastId))); 
     }
   }
 
@@ -122,7 +122,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
       default -> new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, employee.id);
     };
 
-    // 보조 정렬(ID)을 반드시 추가해야 페이징이 안정적입니다.
+    
     return new OrderSpecifier[]{mainOrder, new OrderSpecifier<>(com.querydsl.core.types.Order.ASC, employee.id)};
   }
 }

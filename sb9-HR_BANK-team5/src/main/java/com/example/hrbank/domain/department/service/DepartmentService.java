@@ -11,13 +11,13 @@ public interface DepartmentService {
 
   DepartmentDto create(DepartmentCreateRequest departmentCreateRequest, Integer employeeCount);
 
-  //다른 서비스에서 dto말고 엔티티가 필요할 때 사용
+  
   Department findEntityById(Long id);
 
-  //"부서 목록 상세 조회"
+  
   DepartmentDto find(Long id);
 
-  //커서 이건 "부서 목록 조회"
+  
   CursorPageResponseDepartmentDto findAll(DepartmentSearchRequest departmentSearchRequest);
 
   DepartmentDto update(Long id, DepartmentUpdateRequest departmentUpdateRequest);
