@@ -1,4 +1,7 @@
 spring:
+
+  main:
+    allow-bean-definition-overriding: true
   profiles:
     active: local # [스위치] 기본값은 로컬로 설정! 배포할 때만 서버에서 이걸 prod로 바꿈
 
