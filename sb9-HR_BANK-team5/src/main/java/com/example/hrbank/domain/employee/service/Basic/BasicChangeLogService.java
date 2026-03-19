@@ -1,4 +1,4 @@
-package com.example.hrbank.domain.employee.service.Impl;
+package com.example.hrbank.domain.employee.service.Basic;
 
 
 import com.example.hrbank.domain.employee.dto.data.ChangeLogDetailDto;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class ChangeLogServiceImpl implements ChangeLogService {
+public class BasicChangeLogService implements ChangeLogService {
   private final ChangeLogRepository repository;
   private final ChangeLogMapper mapper;
   private final EmployeeRepository employeeRepository;

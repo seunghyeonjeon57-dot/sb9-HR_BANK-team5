@@ -1,4 +1,4 @@
-package com.example.hrbank.domain.employee.service.Impl;
+package com.example.hrbank.domain.employee.service.Basic;
 
 import com.example.hrbank.domain.employee.dto.data.EmployeeDistributionDto;
 import com.example.hrbank.domain.employee.dto.data.EmployeeEventCount;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class EmployeeStatsServiceImpl implements EmployeeStatsService {
+public class BasicEmployeeStatsService implements EmployeeStatsService {
 
   private final EmployeeStatsRepository repository;
 

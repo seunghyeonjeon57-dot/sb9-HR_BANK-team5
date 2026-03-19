@@ -1,11 +1,10 @@
-package com.example.hrbank.domain.backup.controller;
+package com.example.hrbank.domain.backup.controller.api;
 
 import com.example.hrbank.domain.backup.dto.request.BackupSearchRequest; // 추가
 import com.example.hrbank.domain.backup.dto.response.BackupCursorPageResponse;
 import com.example.hrbank.domain.backup.dto.response.BackupResponse;
 import com.example.hrbank.domain.backup.entity.BackupStatus;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springdoc.core.annotations.ParameterObject; // 추가

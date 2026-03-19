@@ -1,23 +1,16 @@
 spring:
-  # 1. 슈퍼베이스(PostgreSQL) 접속 정보 (나중에 채울 곳!)
   datasource:
-    url: jdbc:postgresql://db.xxxx.supabase.co:5432/postgres
-    username: postgres
-    password: ${DB_PASSWORD} # 비밀번호는 나중에 환경변수로!
+    url: jdbc:postgresql://aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
+    username: postgres.keqqwlmmmdwoyspihrtx
+    password: ${DB_PASSWORD}
 
-  # 2. 배포용 안전 설정
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: validate # 서버에선 테이블 구조가 맞는지 확인만 함 (데이터 보호)
-    show-sql: false      # 서버 로그가 너무 지저분해지지 않게 끔
+      ddl-auto: update
+    show-sql: false
 
-  # 3. 배포 환경에선 H2 콘솔이 필요 없음 (보안)
-  h2:
-    console:
-      enabled: false
 
-# 4. 실제 서버의 파일 저장 경로 (서버용 경로)
 app:
   storage:
-    path: "/var/lib/hr-bank/storage"
+    path: "/tmp/storage"

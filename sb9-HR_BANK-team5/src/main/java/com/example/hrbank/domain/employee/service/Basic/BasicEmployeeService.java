@@ -1,4 +1,4 @@
-package com.example.hrbank.domain.employee.service.Impl;
+package com.example.hrbank.domain.employee.service.Basic;
 
 import com.example.hrbank.domain.binarycontent.dto.data.BinaryContentDto;
 import com.example.hrbank.domain.binarycontent.dto.request.BinaryContentRequest;
@@ -36,7 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EmployeeServiceImpl implements EmployeeService {
+public class BasicEmployeeService implements EmployeeService {
 
   private final EmployeeMapper mapper;
   private final EmployeeRepository repository;
