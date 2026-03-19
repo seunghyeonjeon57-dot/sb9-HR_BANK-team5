@@ -1,4 +1,4 @@
-package com.example.hrbank.domain.backup.service;
+package com.example.hrbank.domain.backup.service.Basic;
 
 import com.example.hrbank.domain.backup.dto.request.BackupSearchRequest;
 import com.example.hrbank.domain.backup.dto.response.BackupCursorPageResponse;
@@ -7,6 +7,7 @@ import com.example.hrbank.domain.backup.entity.BackupHistory;
 import com.example.hrbank.domain.backup.entity.BackupStatus;
 import com.example.hrbank.domain.backup.mapper.BackupMapper;
 import com.example.hrbank.domain.backup.repository.BackupRepository;
+import com.example.hrbank.domain.backup.service.BackupService;
 import com.example.hrbank.domain.binarycontent.dto.data.BinaryContentDto;
 import com.example.hrbank.domain.binarycontent.dto.request.BinaryContentRequest;
 import com.example.hrbank.domain.binarycontent.service.BinaryContentService;
