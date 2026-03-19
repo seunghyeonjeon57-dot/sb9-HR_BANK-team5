@@ -64,12 +64,19 @@ public class BasicDepartmentService implements DepartmentService {
 
   // 나머지 메서드(create, find, update, delete)는 로직상 완벽하므로 수정 없이 사용하시면 됩니다.
   @Override @Transactional public DepartmentDto create(DepartmentCreateRequest r, Integer c) {
-    if (departmentRepository.existsByName(r.name())) throw new BusinessException(ErrorCode.DEPT_NAME_DUPLICATION);
+    if (departmentRepository.existsByName(r.name())) throw new IllegalArgumentException("부서이름이 이미 존재합니다.");
     Department d = new Department(r.name(), r.description(), r.establishedDate(), c);
     return departmentMapper.toDto(departmentRepository.save(d));
   }
-  @Override @Transactional(readOnly = true) public Department findEntityById(Long id) { return departmentRepository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.DEPT_NOT_FOUND)); }
+  @Override @Transactional(readOnly = true) public Department findEntityById(Long id) { return departmentRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 Id를 가진 부서가 존재하지 않습니다.")); }
   @Override @Transactional(readOnly = true) public DepartmentDto find(Long id) { return departmentMapper.toDto(findEntityById(id)); }
-  @Override @Transactional public DepartmentDto update(Long id, DepartmentUpdateRequest r) { Department d = findEntityById(id); d.update(r.name(), r.description(), r.establishedDate()); return departmentMapper.toDto(d); }
-  @Override @Transactional public void delete(Long id) { if (employeeRepository.existsByDepartmentId(id)) throw new BusinessException(ErrorCode.DEPT_DELETE_NOT_ALLOWED); departmentRepository.delete(findEntityById(id)); }
+  @Override @Transactional public DepartmentDto update(Long id, DepartmentUpdateRequest r) {
+    Department d = findEntityById(id);
+    if (!d.getName().equals(r.name()) && departmentRepository.existsByName(r.name())) {
+      throw new IllegalArgumentException("부서 이름이 이미 존재합니다.");
+    }
+
+    d.update(r.name(), r.description(), r.establishedDate());
+    return departmentMapper.toDto(d); }
+  @Override @Transactional public void delete(Long id) { if (employeeRepository.existsByDepartmentId(id)) throw new IllegalStateException("소속 직원이 있는 부서는 삭제할 수 없습니다."); departmentRepository.delete(findEntityById(id)); }
 }

@@ -48,23 +48,26 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
 
   @Override
   public List<EmployeeDistributionDto> totalEmployeeDistribution(String groupBy, EmployeeStatus status) {
-    // 1. 기본값 및 소문자 처리
     String criteria = (groupBy == null || groupBy.isEmpty()) ? "department" : groupBy.toLowerCase();
 
-    // 2. Expression 타입을 StringExpression으로 지정 (as 메서드 사용 가능해짐)
-    com.querydsl.core.types.dsl.StringExpression groupPath;
+    // ✅ SELECT용 (가공 포함)
+    com.querydsl.core.types.dsl.StringExpression selectExpr;
+
+    // ✅ GROUP BY용 (원본 컬럼)
+    com.querydsl.core.types.dsl.StringExpression groupByExpr;
 
     if ("department".equals(criteria)) {
-      groupPath = employee.department.name.coalesce("미지정");
+      selectExpr = employee.department.name.coalesce("미지정"); // null → "미지정"
+      groupByExpr = employee.department.name; // 🔥 핵심: 원본 컬럼
     } else if ("position".equals(criteria)) {
-      groupPath = employee.position;
+      selectExpr = employee.position;
+      groupByExpr = employee.position;
     } else {
       throw new IllegalArgumentException("지원하지 않는 그룹화 기준입니다.");
     }
 
-    // 3. 타입 안정성을 위해 JPAQuery를 명시적으로 선언 (Tuple 에러 방지)
     var query = factory.select(Projections.constructor(EmployeeDistributionDto.class,
-            groupPath, // 팩트: 여기서 .as() 안 써도 생성자 순서만 맞으면 들어갑니다.
+            selectExpr,              // ✅ 가공된 값
             employee.count(),
             Expressions.asNumber(0.0)))
         .from(employee);
@@ -73,9 +76,8 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
       query.leftJoin(employee.department);
     }
 
-    // 4. fetch() 결과가 List<EmployeeDistributionDto>임을 보장함
     return query.where(statusEq(status))
-        .groupBy(groupPath)
+        .groupBy(groupByExpr) // ✅ 여기 수정됨
         .fetch();
   }
 
@@ -144,6 +146,3 @@ public class EmployeeStatsRepositoryImpl implements EmployeeStatsRepositoryCusto
 
 
 }
-
-
-

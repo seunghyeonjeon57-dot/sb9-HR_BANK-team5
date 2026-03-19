@@ -50,9 +50,14 @@ public class EmployeeServiceImpl implements EmployeeService {
   @Override
   public EmployeeDto createEmployee(EmployeeCreateRequest request, MultipartFile profile,String ipAddress) {
     BinaryContent profileEntity = uploadProfileImage(profile);
+    if(repository.existsByEmail(request.email())){
+      throw new IllegalArgumentException("이미 사용 중인 이메일이에요");
+    }
+
+
     Department department = departmentRepository.findById(request.departmentId())
         .orElseThrow(() -> new NoSuchElementException("부서가 없습니다."));
-      department.addEmployee();
+    department.addEmployee();
 
     Employee employee = Employee.builder()
         .name(request.name())
@@ -120,7 +125,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         .orElseThrow(() -> new NoSuchElementException("사원을 찾을 수 없습니다."));
 
     if (!employee.getEmail().equals(request.email()) && repository.existsByEmail(request.email())) {
-      throw new BusinessException(ErrorCode.EMAIL_DUPLICATION);
+      throw new IllegalArgumentException("이미 사용 중인 이메일이예요");
     }
 
     BinaryContent newProfileImage = uploadProfileImage(profile);
@@ -166,7 +171,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   @Override
   @Transactional
   public void deleteEmployee(Long id, String ipAddress) {
-    // 1. 직원 정보 가져오기
+
     Employee employee = repository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("사원이 없습니다."));
 
