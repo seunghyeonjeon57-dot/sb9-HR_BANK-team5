@@ -820,3 +820,878 @@ Hibernate:
         (created_at, ended_at, file_id, started_at, status, updated_at, worker, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, default)
+2026-03-22T16:56:58.074+09:00  INFO 54607 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-22T16:56:58.077+09:00  INFO 54607 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-03-22T16:56:58.258+09:00  INFO 54607 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 181 ms
+Hibernate: 
+    select
+        bh1_0.id,
+        bh1_0.created_at,
+        bh1_0.ended_at,
+        bh1_0.file_id,
+        bh1_0.started_at,
+        bh1_0.status,
+        bh1_0.updated_at,
+        bh1_0.worker 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    order by
+        bh1_0.started_at desc 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=?
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=?
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=?
+Hibernate: 
+    select
+        count(cl1_0.id) 
+    from
+        change_logs cl1_0 
+    where
+        cl1_0.created_at between ? and ?
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=? 
+        and e1_0.hire_date>=?
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.hire_date<? 
+        and (
+            e1_0.resignation_date is null 
+            or e1_0.resignation_date>=?
+        )
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=?
+Hibernate: 
+    select
+        e1_0.hire_date,
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.hire_date between ? and ? 
+        and e1_0.hire_date is not null 
+    group by
+        e1_0.hire_date
+Hibernate: 
+    select
+        e1_0.position,
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=? 
+    group by
+        e1_0.position
+Hibernate: 
+    select
+        e1_0.resignation_date,
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.resignation_date between ? and ? 
+        and e1_0.resignation_date is not null 
+    group by
+        e1_0.resignation_date
+Hibernate: 
+    select
+        coalesce(d1_0.name, ?),
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    left join
+        departments d1_0 
+            on d1_0.id=e1_0.department_id 
+    where
+        e1_0.status=? 
+    group by
+        d1_0.name
+2026-03-22T16:57:00.746+09:00  INFO 54607 --- [nio-8080-exec-2] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 696 ms
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=?
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=? 
+        and e1_0.hire_date>=?
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=?
+Hibernate: 
+    select
+        bh1_0.id,
+        bh1_0.created_at,
+        bh1_0.ended_at,
+        bh1_0.file_id,
+        bh1_0.started_at,
+        bh1_0.status,
+        bh1_0.updated_at,
+        bh1_0.worker 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    order by
+        bh1_0.started_at desc 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        count(cl1_0.id) 
+    from
+        change_logs cl1_0 
+    where
+        cl1_0.created_at between ? and ?
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.hire_date<? 
+        and (
+            e1_0.resignation_date is null 
+            or e1_0.resignation_date>=?
+        )
+Hibernate: 
+    select
+        e1_0.hire_date,
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.hire_date between ? and ? 
+        and e1_0.hire_date is not null 
+    group by
+        e1_0.hire_date
+Hibernate: 
+    select
+        coalesce(d1_0.name, ?),
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    left join
+        departments d1_0 
+            on d1_0.id=e1_0.department_id 
+    where
+        e1_0.status=? 
+    group by
+        d1_0.name
+Hibernate: 
+    select
+        e1_0.resignation_date,
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.resignation_date between ? and ? 
+        and e1_0.resignation_date is not null 
+    group by
+        e1_0.resignation_date
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=?
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=?
+Hibernate: 
+    select
+        e1_0.position,
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=? 
+    group by
+        e1_0.position
+Hibernate: 
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.description,
+        d1_0.employee_count,
+        d1_0.established_date,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        departments d1_0 
+    where
+        (
+            ? is null 
+            or ?='' 
+            or d1_0.name like ? escape '' 
+            or d1_0.description like ? escape ''
+        ) 
+        and (
+            ? is null 
+            or (
+                ?='asc' 
+                and (
+                    (
+                        case 
+                            when ?='name' 
+                                then d1_0.name 
+                            when ?='establishedDate' 
+                                then cast(d1_0.established_date as varchar) 
+                            else cast(d1_0.id as varchar) 
+                        end>?
+                    ) 
+                    or (
+                        case 
+                            when ?='name' 
+                                then d1_0.name 
+                            when ?='establishedDate' 
+                                then cast(d1_0.established_date as varchar) 
+                            else cast(d1_0.id as varchar) 
+                        end=? 
+                        and d1_0.id>?
+                    )
+                )
+            ) 
+            or (
+                ?='desc' 
+                and (
+                    (
+                        case 
+                            when ?='name' 
+                                then d1_0.name 
+                            when ?='establishedDate' 
+                                then cast(d1_0.established_date as varchar) 
+                            else cast(d1_0.id as varchar) 
+                        end<?
+                    ) 
+                    or (
+                        case 
+                            when ?='name' 
+                                then d1_0.name 
+                            when ?='establishedDate' 
+                                then cast(d1_0.established_date as varchar) 
+                            else cast(d1_0.id as varchar) 
+                        end=? 
+                        and d1_0.id>?
+                    )
+                )
+            )
+        ) 
+    order by
+        d1_0.established_date desc,
+        d1_0.id 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        count(*) 
+    from
+        departments d1_0
+>>> [REQ] idAfter: null | size: 10 | sort: hireDate
+Hibernate: 
+    select
+        e1_0.id,
+        e1_0.created_at,
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.description,
+        d1_0.employee_count,
+        d1_0.established_date,
+        d1_0.name,
+        d1_0.updated_at,
+        e1_0.email,
+        e1_0.employee_number,
+        e1_0.hire_date,
+        e1_0.name,
+        e1_0.position,
+        e1_0.profile_image_id,
+        e1_0.resignation_date,
+        e1_0.status,
+        e1_0.updated_at 
+    from
+        employees e1_0 
+    left join
+        departments d1_0 
+            on d1_0.id=e1_0.department_id 
+    order by
+        e1_0.hire_date desc,
+        e1_0.id 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0
+<<< [RES] nextIdAfter: 33 | hasNext: true | count: 10
+--------------------------------------------------
+Hibernate: 
+    select
+        e1_0.id,
+        e1_0.created_at,
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.description,
+        d1_0.employee_count,
+        d1_0.established_date,
+        d1_0.name,
+        d1_0.updated_at,
+        e1_0.email,
+        e1_0.employee_number,
+        e1_0.hire_date,
+        e1_0.name,
+        e1_0.position,
+        e1_0.profile_image_id,
+        e1_0.resignation_date,
+        e1_0.status,
+        e1_0.updated_at 
+    from
+        employees e1_0 
+    left join
+        departments d1_0 
+            on d1_0.id=e1_0.department_id 
+    order by
+        e1_0.hire_date desc,
+        e1_0.id 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0
+Hibernate: 
+    select
+        cl1_0.id,
+        cl1_0.created_at,
+        cl1_0.employee_number,
+        cl1_0.ip_address,
+        cl1_0.memo,
+        cl1_0.type,
+        cl1_0.updated_at 
+    from
+        change_logs cl1_0 
+    order by
+        cl1_0.created_at desc 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        count(cl1_0.id) 
+    from
+        change_logs cl1_0
+>>> [REQ] idAfter: null | size: 10 | sort: hireDate
+Hibernate: 
+    select
+        e1_0.id,
+        e1_0.created_at,
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.description,
+        d1_0.employee_count,
+        d1_0.established_date,
+        d1_0.name,
+        d1_0.updated_at,
+        e1_0.email,
+        e1_0.employee_number,
+        e1_0.hire_date,
+        e1_0.name,
+        e1_0.position,
+        e1_0.profile_image_id,
+        e1_0.resignation_date,
+        e1_0.status,
+        e1_0.updated_at 
+    from
+        employees e1_0 
+    left join
+        departments d1_0 
+            on d1_0.id=e1_0.department_id 
+    order by
+        e1_0.hire_date desc,
+        e1_0.id 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0
+<<< [RES] nextIdAfter: 33 | hasNext: true | count: 10
+--------------------------------------------------
+Hibernate: 
+    select
+        e1_0.id,
+        e1_0.created_at,
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.description,
+        d1_0.employee_count,
+        d1_0.established_date,
+        d1_0.name,
+        d1_0.updated_at,
+        e1_0.email,
+        e1_0.employee_number,
+        e1_0.hire_date,
+        e1_0.name,
+        e1_0.position,
+        e1_0.profile_image_id,
+        e1_0.resignation_date,
+        e1_0.status,
+        e1_0.updated_at 
+    from
+        employees e1_0 
+    left join
+        departments d1_0 
+            on d1_0.id=e1_0.department_id 
+    order by
+        e1_0.hire_date desc,
+        e1_0.id 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0
+Hibernate: 
+    select
+        cl1_0.id,
+        cl1_0.created_at,
+        cl1_0.employee_number,
+        cl1_0.ip_address,
+        cl1_0.memo,
+        cl1_0.type,
+        cl1_0.updated_at 
+    from
+        change_logs cl1_0 
+    order by
+        cl1_0.created_at desc 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        count(cl1_0.id) 
+    from
+        change_logs cl1_0
+Hibernate: 
+    select
+        d1_0.id,
+        d1_0.created_at,
+        d1_0.description,
+        d1_0.employee_count,
+        d1_0.established_date,
+        d1_0.name,
+        d1_0.updated_at 
+    from
+        departments d1_0 
+    where
+        (
+            ? is null 
+            or ?='' 
+            or d1_0.name like ? escape '' 
+            or d1_0.description like ? escape ''
+        ) 
+        and (
+            ? is null 
+            or (
+                ?='asc' 
+                and (
+                    (
+                        case 
+                            when ?='name' 
+                                then d1_0.name 
+                            when ?='establishedDate' 
+                                then cast(d1_0.established_date as varchar) 
+                            else cast(d1_0.id as varchar) 
+                        end>?
+                    ) 
+                    or (
+                        case 
+                            when ?='name' 
+                                then d1_0.name 
+                            when ?='establishedDate' 
+                                then cast(d1_0.established_date as varchar) 
+                            else cast(d1_0.id as varchar) 
+                        end=? 
+                        and d1_0.id>?
+                    )
+                )
+            ) 
+            or (
+                ?='desc' 
+                and (
+                    (
+                        case 
+                            when ?='name' 
+                                then d1_0.name 
+                            when ?='establishedDate' 
+                                then cast(d1_0.established_date as varchar) 
+                            else cast(d1_0.id as varchar) 
+                        end<?
+                    ) 
+                    or (
+                        case 
+                            when ?='name' 
+                                then d1_0.name 
+                            when ?='establishedDate' 
+                                then cast(d1_0.established_date as varchar) 
+                            else cast(d1_0.id as varchar) 
+                        end=? 
+                        and d1_0.id>?
+                    )
+                )
+            )
+        ) 
+    order by
+        d1_0.established_date desc,
+        d1_0.id 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        count(*) 
+    from
+        departments d1_0
+Hibernate: 
+    select
+        bh1_0.id 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        bh1_0.id,
+        bh1_0.created_at,
+        bh1_0.ended_at,
+        bh1_0.file_id,
+        bh1_0.started_at,
+        bh1_0.status,
+        bh1_0.updated_at,
+        bh1_0.worker 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    order by
+        bh1_0.started_at desc 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        cl1_0.id 
+    from
+        change_logs cl1_0 
+    where
+        cl1_0.updated_at>? 
+    fetch
+        first ? rows only
+Hibernate: 
+    insert 
+    into
+        backup_history
+        (created_at, ended_at, file_id, started_at, status, updated_at, worker, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, default)
+Hibernate: 
+    select
+        bh1_0.id 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        bh1_0.id,
+        bh1_0.created_at,
+        bh1_0.ended_at,
+        bh1_0.file_id,
+        bh1_0.started_at,
+        bh1_0.status,
+        bh1_0.updated_at,
+        bh1_0.worker 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    order by
+        bh1_0.started_at desc 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        cl1_0.id 
+    from
+        change_logs cl1_0 
+    where
+        cl1_0.updated_at>? 
+    fetch
+        first ? rows only
+Hibernate: 
+    insert 
+    into
+        backup_history
+        (created_at, ended_at, file_id, started_at, status, updated_at, worker, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, default)
+Hibernate: 
+    select
+        bh1_0.id 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        bh1_0.id,
+        bh1_0.created_at,
+        bh1_0.ended_at,
+        bh1_0.file_id,
+        bh1_0.started_at,
+        bh1_0.status,
+        bh1_0.updated_at,
+        bh1_0.worker 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    order by
+        bh1_0.started_at desc 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        cl1_0.id 
+    from
+        change_logs cl1_0 
+    where
+        cl1_0.updated_at>? 
+    fetch
+        first ? rows only
+Hibernate: 
+    insert 
+    into
+        backup_history
+        (created_at, ended_at, file_id, started_at, status, updated_at, worker, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, default)
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=? 
+        and e1_0.hire_date>=?
+Hibernate: 
+    select
+        count(cl1_0.id) 
+    from
+        change_logs cl1_0 
+    where
+        cl1_0.created_at between ? and ?
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=?
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.hire_date<? 
+        and (
+            e1_0.resignation_date is null 
+            or e1_0.resignation_date>=?
+        )
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=?
+Hibernate: 
+    select
+        bh1_0.id,
+        bh1_0.created_at,
+        bh1_0.ended_at,
+        bh1_0.file_id,
+        bh1_0.started_at,
+        bh1_0.status,
+        bh1_0.updated_at,
+        bh1_0.worker 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    order by
+        bh1_0.started_at desc 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        e1_0.hire_date,
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.hire_date between ? and ? 
+        and e1_0.hire_date is not null 
+    group by
+        e1_0.hire_date
+Hibernate: 
+    select
+        coalesce(d1_0.name, ?),
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    left join
+        departments d1_0 
+            on d1_0.id=e1_0.department_id 
+    where
+        e1_0.status=? 
+    group by
+        d1_0.name
+Hibernate: 
+    select
+        e1_0.resignation_date,
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.resignation_date between ? and ? 
+        and e1_0.resignation_date is not null 
+    group by
+        e1_0.resignation_date
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=?
+Hibernate: 
+    select
+        e1_0.position,
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=? 
+    group by
+        e1_0.position
+Hibernate: 
+    select
+        count(e1_0.id) 
+    from
+        employees e1_0 
+    where
+        e1_0.status=?
+Hibernate: 
+    select
+        bh1_0.id 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        bh1_0.id,
+        bh1_0.created_at,
+        bh1_0.ended_at,
+        bh1_0.file_id,
+        bh1_0.started_at,
+        bh1_0.status,
+        bh1_0.updated_at,
+        bh1_0.worker 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    order by
+        bh1_0.started_at desc 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        cl1_0.id 
+    from
+        change_logs cl1_0 
+    where
+        cl1_0.updated_at>? 
+    fetch
+        first ? rows only
+Hibernate: 
+    insert 
+    into
+        backup_history
+        (created_at, ended_at, file_id, started_at, status, updated_at, worker, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, default)

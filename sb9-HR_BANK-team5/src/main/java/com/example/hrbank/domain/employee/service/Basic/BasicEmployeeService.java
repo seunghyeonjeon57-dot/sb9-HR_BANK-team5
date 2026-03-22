@@ -59,9 +59,15 @@ public class BasicEmployeeService implements EmployeeService {
         .orElseThrow(() -> new NoSuchElementException("부서가 없습니다."));
     department.addEmployee();
 
+    String lastEmpNo = repository.findLastEmployeeNumber().orElse("EMP-2026000");
+
+    // 2. 숫자 부분만 추출해서 +1 하기
+    int nextNum = Integer.parseInt(lastEmpNo.replace("EMP-", "")) + 1;
+    String newEmpNo = "EMP-" + nextNum;
     Employee employee = Employee.builder()
         .name(request.name())
         .email(request.email())
+        .employeeNumber(newEmpNo)
         .position(request.position())
         .hireDate(request.hireDate())
         .status(EmployeeStatus.ACTIVE)

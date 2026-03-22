@@ -32,37 +32,38 @@ import lombok.Setter;
 @Entity(name = "employees")
 @Getter
 public class Employee extends BaseTimeEntity {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  @Column(name ="name",length = 50,nullable = false)
+  @Column(name = "name", length = 50, nullable = false)
   private String name;
-  @Column(name = "email",length=100,nullable = false,unique = true)
+  @Column(name = "email", length = 100, nullable = false, unique = true)
   private String email;
-  @Column(name="employee_number",length =50,nullable = false,unique = true)
+  @Column(name = "employee_number", length = 50, nullable = false, unique = true)
   private String employeeNumber;
-  @Column(name="position",length = 50)
+  @Column(name = "position", length = 50)
   private String position;
-  @Column(name="hire_date",nullable = false)
+  @Column(name = "hire_date", nullable = false)
   private LocalDate hireDate;
-  @Column(name="resignation_date")
+  @Column(name = "resignation_date")
   private LocalDate resignationDate;
 
   @Enumerated(EnumType.STRING)
-  @Column(name="status",nullable = false)
+  @Column(name = "status", nullable = false)
   private EmployeeStatus status;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name="department_id",foreignKey = @ForeignKey(name = "FK_EMP_DEPT"))
+  @JoinColumn(name = "department_id", foreignKey = @ForeignKey(name = "FK_EMP_DEPT"))
   private Department department;
 
-  @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true)
-  @JoinColumn(name="profile_image_id",foreignKey = @ForeignKey(name = "FK_EMP_PROFILE"))
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "profile_image_id", foreignKey = @ForeignKey(name = "FK_EMP_PROFILE"))
   private BinaryContent profileImage;
 
   @Builder
   public Employee(Long id, String name, String email, String employeeNumber, String position,
-      LocalDate hireDate,LocalDate resignationDate, EmployeeStatus status, Department department,
+      LocalDate hireDate, LocalDate resignationDate, EmployeeStatus status, Department department,
       BinaryContent profileImage) {
     this.id = id;
     this.name = name;
@@ -70,34 +71,30 @@ public class Employee extends BaseTimeEntity {
     this.employeeNumber = employeeNumber;
     this.position = position;
     this.hireDate = hireDate;
-    this.resignationDate=resignationDate;
+    this.resignationDate = resignationDate;
     this.status = status;
     this.department = department;
     this.profileImage = profileImage;
   }
 
-  public void changeDepartment(Department newdepartment){
-    this.department=newdepartment;
+  public void changeDepartment(Department newdepartment) {
+    this.department = newdepartment;
   }
-  public void updateEmployee(String newName,String newEmail,String newPosition,LocalDate newHireDate,EmployeeStatus newStatus,
-      BinaryContent newProfileImage){
-    this.name =newName;
-    this.email =newEmail;
-    this.position=newPosition;
-    this.hireDate=newHireDate;
+
+  public void updateEmployee(String newName, String newEmail, String newPosition,
+      LocalDate newHireDate, EmployeeStatus newStatus,
+      BinaryContent newProfileImage) {
+    this.name = newName;
+    this.email = newEmail;
+    this.position = newPosition;
+    this.hireDate = newHireDate;
     this.status = newStatus;
-    this.profileImage=newProfileImage;
+    this.profileImage = newProfileImage;
   }
-  public void resign(){
-    this.status=EmployeeStatus.RESIGNED;
+
+  public void resign() {
+    this.status = EmployeeStatus.RESIGNED;
     this.resignationDate = LocalDate.now();
 
-  }
-  @PrePersist
-  public void generateEmployeeNumberBeforePersist() {
-    if (this.employeeNumber == null) {
-      // 팩트: 저장 직전에 사번이 비어있다면 여기서 생성해서 채워줌
-      this.employeeNumber = "EMP-" + System.currentTimeMillis();
-    }
   }
 }

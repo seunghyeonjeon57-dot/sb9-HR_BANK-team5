@@ -32,3 +32,6 @@ spring:
 app:
   storage:
     path: "./data/storage"
+
+server:
+  port: 9090
