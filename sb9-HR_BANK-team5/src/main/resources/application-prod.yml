@@ -10,6 +10,10 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+    properties:
+      hibernate:
+        generate_statistics: true  # <--- 이게 true로 찍혀야 범인을 잡습니다.
+        format_sql: true
 
 
 app:
