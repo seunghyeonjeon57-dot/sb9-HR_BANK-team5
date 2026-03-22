@@ -22,5 +22,5 @@ app:
 
 logging:
   level:
-    org.hibernate.orm.jdbc.bind: trace # 쿼리에 들어가는 파라미터 확인
+    org.hibernate.orm.jdbc.bind: info # 쿼리에 들어가는 파라미터 확인
     org.hibernate.stat: debug # 쿼리 실행 시간 통계 출력
