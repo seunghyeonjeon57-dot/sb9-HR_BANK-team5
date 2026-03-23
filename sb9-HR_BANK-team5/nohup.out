@@ -1695,3 +1695,192 @@ Hibernate:
         (created_at, ended_at, file_id, started_at, status, updated_at, worker, id) 
     values
         (?, ?, ?, ?, ?, ?, ?, default)
+Hibernate: 
+    select
+        bh1_0.id 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        bh1_0.id,
+        bh1_0.created_at,
+        bh1_0.ended_at,
+        bh1_0.file_id,
+        bh1_0.started_at,
+        bh1_0.status,
+        bh1_0.updated_at,
+        bh1_0.worker 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    order by
+        bh1_0.started_at desc 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        cl1_0.id 
+    from
+        change_logs cl1_0 
+    where
+        cl1_0.updated_at>? 
+    fetch
+        first ? rows only
+Hibernate: 
+    insert 
+    into
+        backup_history
+        (created_at, ended_at, file_id, started_at, status, updated_at, worker, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, default)
+Hibernate: 
+    select
+        bh1_0.id 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        bh1_0.id,
+        bh1_0.created_at,
+        bh1_0.ended_at,
+        bh1_0.file_id,
+        bh1_0.started_at,
+        bh1_0.status,
+        bh1_0.updated_at,
+        bh1_0.worker 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    order by
+        bh1_0.started_at desc 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        cl1_0.id 
+    from
+        change_logs cl1_0 
+    where
+        cl1_0.updated_at>? 
+    fetch
+        first ? rows only
+Hibernate: 
+    insert 
+    into
+        backup_history
+        (created_at, ended_at, file_id, started_at, status, updated_at, worker, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, default)
+2026-03-22T22:27:42.816+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=2m16s583ms).
+2026-03-22T22:41:19.141+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=13m36s334ms).
+2026-03-22T22:42:44.805+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m25s665ms).
+2026-03-22T22:57:39.848+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=14m55s42ms).
+2026-03-22T23:30:33.706+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=32m53s858ms).
+2026-03-23T00:26:41.574+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=56m7s868ms).
+2026-03-23T01:49:24.033+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h22m12s443ms).
+2026-03-23T03:29:05.788+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h39m41s756ms).
+2026-03-23T04:25:11.640+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=56m5s851ms).
+2026-03-23T04:58:40.252+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=32m58s588ms).
+2026-03-23T05:14:42.180+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=16m1s929ms).
+2026-03-23T06:26:05.751+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h11m23s570ms).
+2026-03-23T07:01:37.086+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=35m1s314ms).
+2026-03-23T07:43:08.661+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=41m1s558ms).
+2026-03-23T08:28:16.673+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=45m8s13ms).
+2026-03-23T08:55:23.562+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=26m36s880ms).
+2026-03-23T08:57:31.283+09:00  WARN 54607 --- [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=2m7s720ms).
+Hibernate: 
+    select
+        bh1_0.id 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        bh1_0.id,
+        bh1_0.created_at,
+        bh1_0.ended_at,
+        bh1_0.file_id,
+        bh1_0.started_at,
+        bh1_0.status,
+        bh1_0.updated_at,
+        bh1_0.worker 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    order by
+        bh1_0.started_at desc 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        cl1_0.id 
+    from
+        change_logs cl1_0 
+    where
+        cl1_0.updated_at>? 
+    fetch
+        first ? rows only
+Hibernate: 
+    insert 
+    into
+        backup_history
+        (created_at, ended_at, file_id, started_at, status, updated_at, worker, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, default)
+Hibernate: 
+    select
+        bh1_0.id 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        bh1_0.id,
+        bh1_0.created_at,
+        bh1_0.ended_at,
+        bh1_0.file_id,
+        bh1_0.started_at,
+        bh1_0.status,
+        bh1_0.updated_at,
+        bh1_0.worker 
+    from
+        backup_history bh1_0 
+    where
+        bh1_0.status=? 
+    order by
+        bh1_0.started_at desc 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        cl1_0.id 
+    from
+        change_logs cl1_0 
+    where
+        cl1_0.updated_at>? 
+    fetch
+        first ? rows only
+Hibernate: 
+    insert 
+    into
+        backup_history
+        (created_at, ended_at, file_id, started_at, status, updated_at, worker, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, default)

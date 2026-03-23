@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee,Long>, EmployeeRepositoryCustom {
+  @Query("SELECT e FROM employees e LEFT JOIN FETCH e.department")
   Stream<Employee> streamAllBy();
   @EntityGraph(attributePaths = {"department","profileImage"})
   Optional<Employee> findById(Long id);

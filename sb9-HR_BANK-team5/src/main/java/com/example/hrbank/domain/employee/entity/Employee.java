@@ -27,9 +27,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED) //JPA 엔티티는 거의 NoArgsConstructor
 @Table
-@Entity(name = "employees")
+@Entity(name = "employees") // 테이블 명 정의
 @Getter
 public class Employee extends BaseTimeEntity {
 
@@ -53,7 +53,7 @@ public class Employee extends BaseTimeEntity {
   @Column(name = "status", nullable = false)
   private EmployeeStatus status;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY) // 사원 정보를 가져올때 당장 필요없는 부서 정보까지 가져와서 서버를 무겁지 않게.
   @JoinColumn(name = "department_id", foreignKey = @ForeignKey(name = "FK_EMP_DEPT"))
   private Department department;
 
@@ -61,7 +61,7 @@ public class Employee extends BaseTimeEntity {
   @JoinColumn(name = "profile_image_id", foreignKey = @ForeignKey(name = "FK_EMP_PROFILE"))
   private BinaryContent profileImage;
 
-  @Builder
+  @Builder //
   public Employee(Long id, String name, String email, String employeeNumber, String position,
       LocalDate hireDate, LocalDate resignationDate, EmployeeStatus status, Department department,
       BinaryContent profileImage) {
@@ -98,3 +98,5 @@ public class Employee extends BaseTimeEntity {
 
   }
 }
+
+//메서드가잇는이유?:엔티티에 비즈니스 로직(update, resign 등)을 포함시켜 객체가 스스로의 상태를 관리하게 했습니다. 이를 통해 서비스 계층의 로직을 단순화하고, 데이터의 일관성을 엔티티 내부에서 강제할 수 있도록 설계했습니다
